@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<project name="t1j" default="build">
+   <description>Creates Deploy- and Source-Jar for T1J.
+      T1j is a program to play Twixt</description>
+
+   <property name="source.dir" value="src"/>
+   <property name="deploy.dir" value="deploy"/>
+   <property name="deploy.source.dir" value="${deploy.dir}/src"/>
+   <property name="deploy.classes.dir" value="${deploy.dir}/bin"/>
+   <property name="sourcezip.name" value="t1j-src.zip"/>
+   <property name="sourcezip.path" value="${deploy.dir}/${sourcezip.name}"/>
+   <property name="package.name" value="net/schwagereit/t1j"/>
+   <property name="jar.name" value="t1j.jar"/>
+   <property name="jar.path" value="${deploy.dir}/${jar.name}"/>
+   <property name="manifest" value="${deploy.source.dir}/Manifest.mf"/>
+
+   <target name="info" description="Just print some system-properties">
+      <echo message="ant.file = ${ant.file}"/>
+      <echo message="ant.version = ${ant.version}"/>
+      <echo message="ant.java.version = ${ant.java.version}"/>
+      <echo message="basedir = ${basedir}"/>
+      <echo message="user.name = ${user.name}"/>
+   </target>
+
+   <target name="source" description="Create Source-zip" depends="init">
+      <copy todir="${deploy.source.dir}">
+         <fileset dir="${source.dir}">
+            <include name="**/*.java"/>
+            <include name="**/*.png"/>
+            <include name="**/*.gif"/>
+            <exclude name="**/test/**"/>
+         </fileset>
+         <fileset refid="common.files" />
+      </copy>
+      <copy todir="${deploy.source.dir}">
+         <fileset dir="${source.dir}">
+            <include name="**/*.properties"/>
+         </fileset>
+         <filterchain>
+            <escapeunicode/>
+         </filterchain>
+      </copy>
+      <copy todir="${deploy.dir}">
+         <fileset dir="${basedir}">
+            <include name="build.xml"/>
+            <include name=""/>
+         </fileset>
+      </copy>
+      <zip destfile="${sourcezip.path}">
+         <fileset dir="${deploy.dir}">
+            <include name="src/**/*"/>
+            <include name="build.xml"/>
+         </fileset>
+      </zip>
+   </target>
+
+   <target name="build" description="Create class-jar (and source-zip)"
+           depends="source, init">
+      <javac destdir="${deploy.classes.dir}"
+             srcdir="${deploy.source.dir}"
+             optimize="yes"
+             debug="no"
+             target="1.4"
+             source="1.4">
+         <include name="**/*.java"/>
+      </javac>
+      <!-- Copy other files needed -->
+      <copy todir="${deploy.classes.dir}">
+         <fileset refid="common.files" />
+         <fileset dir="${deploy.source.dir}">
+            <include name="**/*.properties"/>
+            <include name="**/*.png"/>
+            <include name="**/*.gif"/>
+         </fileset>
+      </copy>
+      <jar destfile="${jar.path}" manifest="${manifest}">
+         <fileset dir="${deploy.classes.dir}"/>
+      </jar>
+   </target>
+
+
+   <target name="init" description="Initialize output-dirs">
+      <delete dir="${deploy.source.dir}"/>
+      <delete dir="${deploy.classes.dir}"/>
+      <mkdir dir="${deploy.source.dir}"/>
+      <mkdir dir="${deploy.classes.dir}"/>
+      <tstamp/>
+      <manifest file="${manifest}">
+         <attribute name="Built-by" value="${user.name}"/>
+         <attribute name="Built-On" value="${TODAY}"/>
+         <attribute name="Main-Class" value="net.schwagereit.t1j.Control"/>
+      </manifest>
+      <fileset dir="${basedir}" id="common.files">
+         <include name="COPYING"/>
+         <include name="AUTHORS"/>
+      </fileset>
+
+   </target>
+
+</project>
