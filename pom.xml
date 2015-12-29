@@ -36,10 +36,10 @@
     </properties>
     <build>
         <finalName>${project.artifactId}</finalName>
-        <sourceDirectory>src</sourceDirectory>
+        <!--<sourceDirectory>src</sourceDirectory>-->
         <resources>
             <resource>
-                <directory>src</directory>
+                <directory>${project.build.sourceDirectory}</directory>
                 <includes>
                     <include>**/*.png</include>
                     <include>**/*.gif</include>

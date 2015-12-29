@@ -3,7 +3,7 @@
    <description>Creates Deploy- and Source-Jar for T1J.
       T1j is a program to play Twixt</description>
 
-   <property name="source.dir" value="src"/>
+   <property name="source.dir" value="src/main/java"/>
    <property name="deploy.dir" value="deploy"/>
    <property name="deploy.source.dir" value="${deploy.dir}/src"/>
    <property name="deploy.classes.dir" value="${deploy.dir}/bin"/>
