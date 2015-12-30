@@ -8,7 +8,10 @@
  ***************************************************************************/
 package net.schwagereit.t1j;
 
+import java.lang.reflect.Array;
 import java.util.*;
+
+import lombok.NonNull;
 
 
 /**
@@ -47,10 +50,11 @@ final class OrderedMoves
 
    }
 
-   private static List valuedMoves;
+   private static List<ValuedMove> valuedMoves;
 
    // 1st for X, 2nd for Y
-   static final Map[] killerMoves = { new HashMap(), new HashMap() };
+   private static final Map<Move,Number>[] killerMoves = newArray(new HashMap<Move,Number>(), new HashMap<Move,Number>());
+
 
 
    private Iterator moveIterator;
@@ -61,7 +65,9 @@ final class OrderedMoves
 
    private boolean gameover;
 
+   @NonNull
    private final CheckPattern checkpattern;
+   @NonNull
    private final Match match;
 
    /**
@@ -83,16 +89,10 @@ final class OrderedMoves
    {
       int ref = (player == Board.XPLAYER) ? 0 : 1;
 
-      Object countObject = killerMoves[ref].get(move);
+      Number countObject = killerMoves[ref].get(move);
 
-      if (countObject == null)
-      {
-         killerMoves[ref].put(move, new Integer(1));
-      }
-      else
-      {
-         killerMoves[ref].put(move, new Integer(((Number) countObject).intValue() + 1));
-      }
+      int val = (countObject == null) ? 1 : countObject.intValue() + 1;
+      killerMoves[ref].put(move, val);
    }
 
    /**
@@ -113,41 +113,26 @@ final class OrderedMoves
     * @param player next Player
     * @return sorted list
     */
-   private List sortMoves(Set moves, int player)
+   private List<Move> sortMoves(Set<Move> moves, int player)
    {
       final int ref = (player == Board.XPLAYER) ? 0 : 1;
-      List list = new ArrayList(moves);
-      Collections.sort(list, new Comparator()
+      List<Move> list = new ArrayList<Move>(moves);
+      Collections.sort(list, new Comparator<Move>()
       {
-         public int compare(Object oOne, Object oTwo)
+         public int compare(Move oOne, Move oTwo)
          {
-            return (getSortValue((Move)oTwo, ref) - getSortValue((Move)oOne, ref));
+            return (getSortValue(oTwo, ref) - getSortValue(oOne, ref));
          }
       });
       return list;
    }
 
-
-   /**
-    * print. please delete.
-
-   static public void printXkiller()
-   {
-      Iterator iterator = killerMoves[0].entrySet().iterator();
-      while (iterator.hasNext())
-      {
-         Map.Entry o = (Map.Entry) iterator.next();
-         System.out.println(o.getKey() + ":" + o.getValue());
-      }
-   }
-    */
-   
    /**
     * Initialize list of valued moves. (done for each move)
     */
    static public void initOrderedMoves()
    {
-      valuedMoves = new ArrayList(INITIAL_CAPACITY);
+      valuedMoves = new ArrayList<ValuedMove>(INITIAL_CAPACITY);
       killerMoves[0].clear();
       killerMoves[1].clear();
    }
@@ -162,17 +147,17 @@ final class OrderedMoves
    {
       if ( isMaxPly && valuedMoves.size() > 0)
       {
-         Collections.sort(valuedMoves, new Comparator()
+         Collections.sort(valuedMoves, new Comparator<ValuedMove>()
          {
-            public int compare(Object o1, Object o2)
+            public int compare(ValuedMove o1, ValuedMove o2)
             {
-               return (((ValuedMove)o1).value - ((ValuedMove)o2).value) * player;
+               return ((o1).value - (o2).value) * player;
             }
          });
-         List orderedMoves = new ArrayList(INITIAL_CAPACITY);
-         for (Iterator iterator = valuedMoves.iterator(); iterator.hasNext();)
+         List<Move> orderedMoves = new ArrayList<Move>(INITIAL_CAPACITY);
+         for (Iterator<ValuedMove> iterator = valuedMoves.iterator(); iterator.hasNext();)
          {
-            ValuedMove valuedMove = (ValuedMove) iterator.next();
+            ValuedMove valuedMove = iterator.next();
             orderedMoves.add(valuedMove.move);
          }
          valuedMoves.clear();
@@ -216,21 +201,22 @@ final class OrderedMoves
       ownEval.valueOfY(true, Board.YPLAYER);
 
       // check own critical points
-      Set s = ownEval.getCritical();
+      Set<Evaluation.CritPos> s = ownEval.getCritical();
       if (s.isEmpty())
       {
          //there are some situations where the last pin set has to be
          //   taken as last hope to find a good move
-         int xc = match.getMoveX(match.getMoveNr());
-         int yc = match.getMoveY(match.getMoveNr());
+         Move lastMove = match.getLastMove();
+         int xc = lastMove.getX();
+         int yc = lastMove.getY();
          s.add(new Evaluation.CritPos(xc, yc, Evaluation.CritPos.DOWN));
          s.add(new Evaluation.CritPos(xc, yc, Evaluation.CritPos.UP));
       }
 
       // iterate over all own critical points
-      for (Iterator iter = s.iterator(); iter.hasNext();)
+      for (Iterator<Evaluation.CritPos> iter = s.iterator(); iter.hasNext();)
       {
-         Evaluation.CritPos element = (Evaluation.CritPos) iter.next();
+         Evaluation.CritPos element = iter.next();
 
          int xe = element.getX();
          int ye = element.getY();
@@ -375,5 +361,10 @@ final class OrderedMoves
    static public void addValuedMove(Move move, int value)
    {
        valuedMoves.add(new ValuedMove(move, value));
+   }
+
+   @SafeVarargs
+   private static <T> T[] newArray(T... items) {
+      return items;
    }
 }

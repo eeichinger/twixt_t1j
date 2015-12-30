@@ -43,7 +43,7 @@ public final class Match extends Observable implements Runnable
    private static final int INIT_ARRAY_SZ = 20;
 
    /** all the moves played yet. */
-   private final List moves = new ArrayList(INIT_ARRAY_SZ);
+   private final List<Move> moves = new ArrayList<Move>(INIT_ARRAY_SZ);
 
    /** highest move number already used in this game. */
    private int highestMoveNr;
@@ -195,6 +195,10 @@ public final class Match extends Observable implements Runnable
    int getMoveY(final int nr)
    {
       return ((Move) moves.get(nr - 1)).getY();
+   }
+
+   Move getLastMove() {
+      return moves.get(moveNr -1);
    }
 
    /**

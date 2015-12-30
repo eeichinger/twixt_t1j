@@ -241,7 +241,7 @@ public final class Evaluation
    private static final int BLOCKED_FIELD_VAL_MULT = BLOCKED_FIELD_VAL * MULT;
 
    /** set of all critical positions. */
-   private final Set critPoss = new HashSet();
+   private final Set<CritPos> critPoss = new HashSet<CritPos>();
 
    /** number of own pins in given row. */
    private final int[] noPins = new int[Board.MAXDIM];
@@ -987,7 +987,7 @@ public final class Evaluation
     * Get all critical Positions.
     * @return Set of critical pins
     */
-   public Set getCritical()
+   public Set<CritPos> getCritical()
    {
       return critPoss;
    }
