@@ -1,0 +1,19 @@
+# File created by T1j
+# T1j is a program to play TwixT (mail@johannes-schwagereit.de)
+1 # version of file-format
+Player 1# Name of Player 1
+Player 2# Name of Player 2
+13# y-size of board
+13# x-size of board
+H# player 1 human or computer
+H# player 2 human or computer
+1# starting player (1 plays top-down)
+V# Direction of letters
+N# pierule?
+N# game already over?
+D9
+F6
+F8
+H7
+E12
+I9
