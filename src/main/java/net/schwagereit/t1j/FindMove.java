@@ -11,6 +11,8 @@ package net.schwagereit.t1j;
 import java.util.Map;
 import java.util.HashMap;
 
+import lombok.NonNull;
+
 
 /**
  * Generate all moves and try to find best one. This class is a singleton.
@@ -19,47 +21,43 @@ import java.util.HashMap;
  */
 public final class FindMove
 {
+   private static final int INITIAL_CAPACITY = 10000;
+   private static final int WAIT_MILLIS = 20;
    private static final int MILLI_PER_SEC = 1000;
    private static final int GAMEOVER = MILLI_PER_SEC;
 
-   private static Match match = null;
-
-   private static final FindMove FINDMOVES = new FindMove();
-
+   @NonNull
+   private final Match match;
 
    /** the bestMove found yet */
    private Move bestMove;
 
-   private static int maxTime;
+   private int maxTime;
 
    /** The searchddepth currently used */
-   private static int currentMaxPly;
+   private int currentMaxPly;
 
    private int currentPlayer;
 
-   private static final int INITIAL_CAPACITY = 10000;
    private final Map zobristMap = new HashMap(INITIAL_CAPACITY);
    private Stopwatch clock;
    /** use alphabeta for highest ply. */
    private boolean usealphabeta;
-   private static final int WAIT_MILLIS = 20;
-
+   @NonNull
+   private final GeneralSettings generalSettings;
 
    /**
     * Cons'tor - no external instance.
     */
-   private FindMove()
+   public FindMove(Match match)
    {
+      this(match, GeneralSettings.getInstance());
    }
 
-   /**
-    * Return the FindMove-Object. (Singleton)
-    * 
-    * @return Findmove-Object
-    */
-   public static FindMove getFindMove()
+   public FindMove(Match match, GeneralSettings generalSettings)
    {
-      return FINDMOVES;
+      this.match = match;
+      this.generalSettings = generalSettings;
    }
 
    /**
@@ -103,16 +101,17 @@ public final class FindMove
     */
    private void internalComputeMove(final int player)
    {
-      int maxPly;if (GeneralSettings.getInstance().mdFixedPly)
+      int maxPly;
+      if (generalSettings.mdFixedPly)
       {
-         maxPly = GeneralSettings.getInstance().mdPly;
+         maxPly = generalSettings.mdPly;
          maxTime = -1;
       }
       else
       {
          //move moves with time-limit
          maxPly = Integer.MAX_VALUE; // will never be reached
-         maxTime = GeneralSettings.getInstance().mdTime;
+         maxTime = generalSettings.mdTime;
       }
 
       // use alpha-beta
@@ -125,25 +124,11 @@ public final class FindMove
             zobristMap.clear();
             alphaBeta(player, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             usealphabeta = true;
-            if (maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getTime())
+            if (isThinkingTimeExceeded())
                break;
          }
       }
    }
-
-
-
-
-   /**
-    * Set the match.
-    * 
-    * @param matchIn The match to set.
-    */
-   public void setMatch(final Match matchIn)
-   {
-      FindMove.match = matchIn;
-   }
-
 
    /**
     * Evaluate situation.
@@ -217,36 +202,14 @@ public final class FindMove
       int val;
       Move move;
 
-//      if (zobristMap.containsKey(new Integer(match.getBoardY().getZobristValue())))
-//      {
-//         //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-//         return ((Integer) zobristMap.get(new Integer(match.getBoardY().getZobristValue())))
-//               .intValue();
-//      }
-//      zobristVal = zobristMap.get(new Integer(match.getBoardY().getZobristValue()));
-//      if (zobristVal != null)
-//      {
-//         //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-//         return ((Integer) zobristVal).intValue();
-//      }
-
-      if (maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getTime())
+      if (isThinkingTimeExceeded())
       {
          return 0;
       }
 
-      if (ply == 0)
+      if (isLeafPly(ply))
       {
-         Object zobristVal=zobristMap.get(new Integer(match.getBoardY().getZobristValue()));
-         if (zobristVal != null)
-         {
-            //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-            return ((Integer) zobristVal).intValue();
-         }
-         //return evaluatePosition(player);
-         val = evaluatePosition(player);
-         zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
-         return val;
+         return positionValue(player);
       }
 
       OrderedMoves moveSet = new OrderedMoves(match);
@@ -262,104 +225,137 @@ public final class FindMove
       // minimizing node
       if (player == Board.XPLAYER)
       {
-         while ((move = moveSet.getMove()) != null)
-         {  
-            makeMove(move, player);
-            val = alphaBeta (-player, ply - 1, alpha, beta);
-            //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
-
-            if (ply == currentMaxPly)
-            {
-               OrderedMoves.addValuedMove(move, val);
-            }
-
-            if (val < beta)
-            {
-               //
-               //
-               //
-               if (ply == currentMaxPly)
-               {
-                  // a new best move is only accepted if time is not over
-                  if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
-                  {
-                     bestMove = move;
-                  }
-
-                  //if (currentMaxPly < maxPly)
-                  //{
-                  //   OrderedMoves.addValuedMove(move, val);
-                  //}
-
-                  if (usealphabeta)
-                  {
-                     beta = val;
-                  }
-               }
-               else
-               {
-                  beta = val;
-                  OrderedMoves.addKiller(move, player);
-               }
-            }
-            unmakeMove(move, player);
-
-            if (beta <= alpha)
-            {
-               return alpha;
-            }
-         }
-         return beta;
+         return evaluateMoveSetX(Board.XPLAYER, ply, alpha, beta, moveSet);
       }
       else
       //maximizing node
       {
-         while ((move = moveSet.getMove()) != null)
+         return evaluateMoveSetY(player, ply, alpha, beta, moveSet);
+      }
+   }
+
+   private int evaluateMoveSetY(int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
+      Move move;
+      int val;
+      while ((move = moveSet.getMove()) != null)
+      {
+         makeMove(move, player);
+         val = alphaBeta (-player, ply - 1, alpha, beta);
+         // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
+         if (ply == currentMaxPly)
          {
-            makeMove(move, player);
-            val = alphaBeta (-player, ply - 1, alpha, beta);
-            // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
+            OrderedMoves.addValuedMove(move, val);
+         }
+         if (val > alpha)
+         {
             if (ply == currentMaxPly)
             {
-               OrderedMoves.addValuedMove(move, val);
-            }
-            if (val > alpha)
-            {
-               if (ply == currentMaxPly)
+               // a new best move is only accepted if time is not over
+               if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
                {
-                  // a new best move is only accepted if time is not over
-                  if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
-                  {
-                     bestMove = move;
-                  }
+                  bestMove = move;
+               }
 
 //                  if (currentMaxPly < maxPly)
 //                  {
 //                     OrderedMoves.addValuedMove(move, val);
 //                  }
 
-                  if (usealphabeta)
-                  {
-                     alpha = val;
-                  }
-               }
-               else
+               if (usealphabeta)
                {
                   alpha = val;
-                  OrderedMoves.addKiller(move, player);
                }
             }
-
-
-            unmakeMove(move, player);
-
-            if (beta <= alpha)
+            else
             {
-               return beta;
+               alpha = val;
+               OrderedMoves.addKiller(move, player);
             }
          }
-         return alpha;
+
+         unmakeMove(move, player);
+
+         if (beta <= alpha)
+         {
+            return beta;
+         }
       }
+      return alpha;
+   }
+
+   private int evaluateMoveSetX(int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
+      Move move;
+      int val;
+      while ((move = moveSet.getMove()) != null)
+      {
+         makeMove(move, player);
+         val = alphaBeta (-player, ply - 1, alpha, beta);
+         //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
+
+         if (ply == currentMaxPly)
+         {
+            OrderedMoves.addValuedMove(move, val);
+         }
+
+         if (val < beta)
+         {
+            //
+            //
+            //
+            if (ply == currentMaxPly)
+            {
+               // a new best move is only accepted if time is not over
+               if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
+               {
+                  bestMove = move;
+               }
+
+               //if (currentMaxPly < maxPly)
+               //{
+               //   OrderedMoves.addValuedMove(move, val);
+               //}
+
+               if (usealphabeta)
+               {
+                  beta = val;
+               }
+            }
+            else
+            {
+               beta = val;
+               OrderedMoves.addKiller(move, player);
+            }
+         }
+         unmakeMove(move, player);
+
+         if (beta <= alpha)
+         {
+            return alpha;
+         }
+      }
+      return beta;
+   }
+
+   private boolean isLeafPly(int ply) {
+      return ply == 0;
+   }
+
+   private boolean isThinkingTimeExceeded() {
+      return maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getTime();
+   }
+
+   private int positionValue(int player) {
+      int val;
+      Object zobristVal=zobristMap.get(new Integer(match.getBoardY().getZobristValue()));
+      if (zobristVal != null)
+      {
+         //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
+         return ((Integer) zobristVal).intValue();
+      }
+      //return evaluatePosition(player);
+      val = evaluatePosition(player);
+      zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
+      return val;
    }
 
 }

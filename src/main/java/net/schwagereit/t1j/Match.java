@@ -34,6 +34,9 @@ public final class Match extends Observable implements Runnable
    
    private MatchData matchData;
 
+   /** Move-Generator */
+   private final FindMove findMove;
+
    /** next player to place a pin. */
    private int nextPlayer;
 
@@ -67,7 +70,7 @@ public final class Match extends Observable implements Runnable
    /**
     * Cons'tor for new match.
     */
-   Match()
+   public Match()
    {
       boardY = Board.getBoard(Board.YPLAYER);
       boardY.setZobristEnabled(true);
@@ -76,7 +79,7 @@ public final class Match extends Observable implements Runnable
       matchData = null;
       //evaluationY = new Evaluation(Board.YPLAYER);
       //evaluationX = new Evaluation(Board.XPLAYER);
-      FindMove.getFindMove().setMatch(this);
+      findMove = new FindMove(this);
    }
 
    /**
@@ -103,7 +106,7 @@ public final class Match extends Observable implements Runnable
     * @param md Data of new game
     * @param computerMove First move of computer if starting player
     */
-   void prepareNewMatch(final MatchData md, final boolean computerMove)
+   public void prepareNewMatch(final MatchData md, final boolean computerMove)
    {
       this.matchData = md;
       nextPlayer = matchData.mdYstarts ? Board.YPLAYER : Board.XPLAYER;
@@ -374,7 +377,7 @@ public final class Match extends Observable implements Runnable
          cursor = frame.getCursor();
          frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-         move = FindMove.getFindMove().computeMove(nextPlayer);
+         move = findMove.computeMove(nextPlayer);
          // System.out.println(moveNr);
 
          setGuiBlocked(false);

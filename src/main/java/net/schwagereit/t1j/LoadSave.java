@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -61,7 +62,7 @@ public final class LoadSave
     * Read a line from the file if possible.
     * @return String or null, if nothing found
     */
-   private static String getLine()
+   private static String getLine(BufferedReader reader)
    {
       String line;
       try
@@ -79,60 +80,42 @@ public final class LoadSave
                return line;
             }
          }
+         return null;
       }
       catch (IOException e)
       {
-         System.out.println("IO-Error reading file '" + filename + "'.");
+         throw new RuntimeException("IO-Error reading file '" + filename + "'.");
       }
-      do
-      {
-
-      } while (false);
-      return null;
    }
 
-   /**
-    * Read Data of saved game.
-    * @param match The match to fill
-    */
-   private static void getGameData(final Match match)
-   {
+   public static void loadGameData(Match match, BufferedReader reader) {
       MatchData loadData = new MatchData();
 
-      try
+      getLine(reader); // version of file-format (ignored)
+      loadData.mdPlayerY = getLine(reader); // Name 1
+      loadData.mdPlayerX = getLine(reader); // Name 2
+
+      loadData.mdYsize = Integer.parseInt(getLine(reader));
+      loadData.mdXsize = Integer.parseInt(getLine(reader));
+
+      loadData.mdYhuman    = (getLine(reader).charAt(0) == 'H');
+      loadData.mdXhuman    = (getLine(reader).charAt(0) == 'H');
+
+      loadData.mdYstarts   = (getLine(reader).charAt(0) == '1');
+
+      getLine(reader); // mdLetterDir (ignored)
+      loadData.mdPieRule   = (getLine(reader).charAt(0) == 'Y');
+      loadData.mdGameOver  = (getLine(reader).charAt(0) == 'Y');
+
+      //take loaded data as new data
+      loadData.correct();
+      loadData.savePreferences();
+      match.prepareNewMatch(loadData, false);
+      // the meta-data was loaded, now lets start with the moves
+      String line;
+      while ((line = getLine(reader)) != null)
       {
-         getLine(); // version of file-format (ignored)
-         loadData.mdPlayerY = getLine(); // Name 1
-         loadData.mdPlayerX = getLine(); // Name 2
-
-         loadData.mdYsize = Integer.parseInt(getLine());
-         loadData.mdXsize = Integer.parseInt(getLine());
-
-         loadData.mdYhuman    = (getLine().charAt(0) == 'H');
-         loadData.mdXhuman    = (getLine().charAt(0) == 'H');
-
-         loadData.mdYstarts   = (getLine().charAt(0) == '1');
-
-         getLine(); // mdLetterDir (ignored)
-         loadData.mdPieRule   = (getLine().charAt(0) == 'Y');
-         loadData.mdGameOver  = (getLine().charAt(0) == 'Y');
-
-         //take loaded data as new data
-         loadData.correct();
-         loadData.savePreferences();
-         match.prepareNewMatch(loadData, false);
-         // the meta-data was loaded, now lets start with the moves
-         String line;
-         while ((line = getLine()) != null)
-         {
-            match.setlastMove(line.charAt(0) - 'A', Integer.parseInt(line.substring(1)) - 1);
-         }
-         match.evaluateAndUpdateGui();
-
-
-      } catch (Exception e)
-      {
-         System.out.println("File '" + filename + "' has wrong format.");
+         match.setlastMove(line.charAt(0) - 'A', Integer.parseInt(line.substring(1)) - 1);
       }
    }
 
@@ -219,7 +202,14 @@ public final class LoadSave
 
          reader = new BufferedReader(new FileReader(filename));
 
-         getGameData(match);
+         try
+         {
+            loadGameData(match, reader);
+            match.evaluateAndUpdateGui();
+         } catch (Exception e)
+         {
+            System.out.println("File '" + filename + "' has wrong format.");
+         }
 
          reader.close();
       } catch (FileNotFoundException e)

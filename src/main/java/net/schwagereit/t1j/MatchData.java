@@ -10,10 +10,13 @@ package net.schwagereit.t1j;
 
 import java.util.prefs.Preferences;
 
+import lombok.Setter;
+
 /**
  * Store all the data of a match, but not the moves.
  * @author Johannes Schwagereit (mail(at)johannes-schwagereit.de)
  */
+@Setter
 public final class MatchData implements Cloneable
 {
    public static final String PREFS_PATH = "/net/schwagereit/t1j";

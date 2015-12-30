@@ -192,7 +192,7 @@ final class OrderedMoves
       //currentPlayer = player;
 
       gameover = false;
-      Set moves = new HashSet();
+      Set<Move> moves = new HashSet<Move>();
       Board ownBoard = match.getBoard(player);
       Evaluation ownEval = ownBoard.getEval();
       Board oppBoard = match.getBoard(-player);
