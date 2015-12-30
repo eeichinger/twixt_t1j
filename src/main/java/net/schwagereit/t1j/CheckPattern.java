@@ -48,7 +48,6 @@ public final class CheckPattern
 
    private final List offensivePatterns = new LinkedList();
    private final List defensivePatterns = new LinkedList();
-   private Set moves;
 
    /**
     * A Pattern consists of several PatternElements.
@@ -226,7 +225,7 @@ public final class CheckPattern
        * @param player the next player
        * @param offense is this move offensive or defensive?
        */
-      private void checkPatternElements(Evaluation.CritPos critPos, Board board, int player,
+      private void checkPatternElements(Set<Move> moves, Evaluation.CritPos critPos, Board board, int player,
                                         boolean offense)
       {
          int px = -1; //reset move-coordinates
@@ -291,12 +290,12 @@ public final class CheckPattern
          {
             if (offense)
             {
-               CheckPattern.getInstance().moves.add(new Move(px, py, player));
+               moves.add(new Move(px, py, player));
             }
             else
             {
                //swap coordinates for defensive move
-               CheckPattern.getInstance().moves.add(new Move(py, px, player));
+               moves.add(new Move(py, px, player));
             }
          }
       }
@@ -464,16 +463,16 @@ public final class CheckPattern
     * @param player Player for next move
     * @return a set of moves
     */
-   public Set findPatternMoves(boolean offense, Board board, Evaluation.CritPos critPos,
+   public Set<Move> findPatternMoves(boolean offense, Board board, Evaluation.CritPos critPos,
                                int player)
    {
-      moves = new HashSet();
+      HashSet<Move> moves = new HashSet<Move>();
 
       List patterns = offense ? offensivePatterns : defensivePatterns;
       for (Iterator iterator = patterns.iterator(); iterator.hasNext();)
       {
          Pattern pattern = (Pattern) iterator.next();
-         pattern.checkPatternElements(critPos, board, player, offense);
+         pattern.checkPatternElements(moves, critPos, board, player, offense);
       } // for Patterns
       return moves;
    }
