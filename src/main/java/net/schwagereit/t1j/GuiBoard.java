@@ -146,10 +146,14 @@ public final class GuiBoard extends JPanel
       int h = hInit;
       for (int i = 0; i < match.getXsize(); h += dist, i++)
          g2.drawString(COL_NAMES[i], h, horBor);
+       // TODO: just tmp help for games in Europaen notation, remove once notation selection is implemented
+//         g2.drawString(COL_NAMES[i] + "("+(i+1)+")", h, horBor);
       //vertical
       h = hInit;
       for (int i = 1; i <= match.getYsize(); h += dist, i++)
          g2.drawString("" + i, verBor, h);
+       // TODO: just tmp help for games in Europaen notation, remove once notation selection is implemented
+//         g2.drawString("" + i + "(" + COL_NAMES[i-1] + ")", verBor - 16, h);
    }
 
    /**
