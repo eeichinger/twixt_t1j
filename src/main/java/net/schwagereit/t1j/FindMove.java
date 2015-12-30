@@ -115,14 +115,14 @@ public final class FindMove
       }
 
       // use alpha-beta
-      OrderedMoves.initOrderedMoves();
+      OrderedMoves.GenerateMoveContext generateMoveContext = new OrderedMoves.GenerateMoveContext();
       usealphabeta = false;
       for (currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
          if (currentMaxPly != 4 || currentMaxPly == maxPly)
          {
             zobristMap.clear();
-            alphaBeta(player, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+            alphaBeta(generateMoveContext, player, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             usealphabeta = true;
             if (isThinkingTimeExceeded())
                break;
@@ -197,7 +197,7 @@ public final class FindMove
     * @param beta beta-value
     * @return value computed
     */
-   private int alphaBeta(int player, int ply, int alpha, int beta)
+   private int alphaBeta(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta)
    {
       int val;
       Move move;
@@ -213,7 +213,7 @@ public final class FindMove
       }
 
       OrderedMoves moveSet = new OrderedMoves(match);
-      moveSet.generateMoves(player, ply == currentMaxPly);
+      moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
 
       // a check for game over
       if (moveSet.isGameover())
@@ -225,26 +225,26 @@ public final class FindMove
       // minimizing node
       if (player == Board.XPLAYER)
       {
-         return evaluateMoveSetX(Board.XPLAYER, ply, alpha, beta, moveSet);
+         return evaluateMoveSetX(generateMoveContext, Board.XPLAYER, ply, alpha, beta, moveSet);
       }
       else
       //maximizing node
       {
-         return evaluateMoveSetY(player, ply, alpha, beta, moveSet);
+         return evaluateMoveSetY(generateMoveContext, player, ply, alpha, beta, moveSet);
       }
    }
 
-   private int evaluateMoveSetY(int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
+   private int evaluateMoveSetY(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
       Move move;
       int val;
       while ((move = moveSet.getMove()) != null)
       {
          makeMove(move, player);
-         val = alphaBeta (-player, ply - 1, alpha, beta);
+         val = alphaBeta (generateMoveContext, -player, ply - 1, alpha, beta);
          // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
          if (ply == currentMaxPly)
          {
-            OrderedMoves.addValuedMove(move, val);
+            generateMoveContext.addValuedMove(move, val);
          }
          if (val > alpha)
          {
@@ -269,7 +269,7 @@ public final class FindMove
             else
             {
                alpha = val;
-               OrderedMoves.addKiller(move, player);
+               generateMoveContext.addKiller(move, player);
             }
          }
 
@@ -283,18 +283,18 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluateMoveSetX(int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
+   private int evaluateMoveSetX(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
       Move move;
       int val;
       while ((move = moveSet.getMove()) != null)
       {
          makeMove(move, player);
-         val = alphaBeta (-player, ply - 1, alpha, beta);
+         val = alphaBeta (generateMoveContext, -player, ply - 1, alpha, beta);
          //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
 
          if (ply == currentMaxPly)
          {
-            OrderedMoves.addValuedMove(move, val);
+            generateMoveContext.addValuedMove(move, val);
          }
 
          if (val < beta)
@@ -323,7 +323,7 @@ public final class FindMove
             else
             {
                beta = val;
-               OrderedMoves.addKiller(move, player);
+               generateMoveContext.addKiller(move, player);
             }
          }
          unmakeMove(move, player);
