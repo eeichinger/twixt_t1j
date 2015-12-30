@@ -61,6 +61,7 @@ final class OrderedMoves
 
    private boolean gameover;
 
+   private final CheckPattern checkpattern;
    private final Match match;
 
    /**
@@ -70,6 +71,7 @@ final class OrderedMoves
    OrderedMoves(Match inMatch)
    {
       match = inMatch;
+      checkpattern = CheckPattern.getInstance();
    }
 
    /**
@@ -284,7 +286,7 @@ final class OrderedMoves
          }
          // try to find additional defensive moves using patterns
          moves.addAll(
-               CheckPattern.getInstance().findPatternMoves(true, ownBoard, element, player));
+               checkpattern.findPatternMoves(true, ownBoard, element, player));
       }
 
       // moves against opponent
@@ -307,7 +309,7 @@ final class OrderedMoves
          }
          // try to find additional defensive moves using patterns
          moves.addAll(
-               CheckPattern.getInstance().findPatternMoves(false, oppBoard, element, player));
+               checkpattern.findPatternMoves(false, oppBoard, element, player));
 
       }
 
