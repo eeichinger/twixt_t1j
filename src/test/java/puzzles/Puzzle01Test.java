@@ -2,17 +2,18 @@ package puzzles;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.Reader;
 
 import net.schwagereit.t1j.Board;
 import net.schwagereit.t1j.FindMove;
 import net.schwagereit.t1j.GeneralSettings;
 import net.schwagereit.t1j.LoadSave;
 import net.schwagereit.t1j.Match;
-import net.schwagereit.t1j.MatchData;
 import net.schwagereit.t1j.Move;
 import net.schwagereit.t1j.Zobrist;
 import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Erich Eichinger
@@ -35,5 +36,8 @@ public class Puzzle01Test {
       final FindMove findMove = new FindMove(match, settings);
 
       Move move = findMove.computeMove(Board.YPLAYER);
+
+      assertThat(move.getX(), equalTo(1));
+      assertThat(move.getY(), equalTo(5));
    }
 }
