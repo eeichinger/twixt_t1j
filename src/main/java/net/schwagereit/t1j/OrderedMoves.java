@@ -135,8 +135,6 @@ final class OrderedMoves
 
    }
 
-   private boolean gameover;
-
    @NonNull
    private final CheckPattern checkpattern;
    @NonNull
@@ -153,10 +151,11 @@ final class OrderedMoves
    }
 
    /**
-    * Find all relevant moves for player.
+    * Find all relevant moves for player. If the returned list is empty, the game is over.
     *
     * @param player X- or Y-player, the next player
     * @param isMaxPly true if current ply is starting ply
+    * @return list of promising moves for player. if empty -> game over
     */
    public final List<Move> generateMoves(GenerateMoveContext generateMoveContext, final int player, boolean isMaxPly)
    {
@@ -182,7 +181,6 @@ final class OrderedMoves
    {
       //currentPlayer = player;
 
-      gameover = false;
       Set<Move> moves = new HashSet<Move>();
       Board ownBoard = match.getBoard(player);
       Evaluation ownEval = ownBoard.getEval();
@@ -196,8 +194,7 @@ final class OrderedMoves
       // gameover?
       if (oppVal == 0)
       {
-         gameover = true;
-         return new HashSet<>();
+         return moves;
       }
 
       // own eval
@@ -304,7 +301,7 @@ final class OrderedMoves
 
       }
 
-      //no moves found?
+      //no moves found, desperately try some random move
       if (moves.isEmpty())
       {
          moves.add(randomMove(player));
@@ -328,16 +325,6 @@ final class OrderedMoves
          by = rand.nextInt(match.getYsize());
       } while (!match.getBoard(Board.YPLAYER).pinAllowed(bx, by, player));
       return new Move(bx, by);
-   }
-
-
-   /**
-    * True, if game is over.
-    * @return true if game is over
-    */
-   public final boolean isGameover()
-   {
-      return gameover;
    }
 
    @SafeVarargs

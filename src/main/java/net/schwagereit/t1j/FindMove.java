@@ -215,7 +215,7 @@ public final class FindMove
       List<Move> orderedMoves = moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
 
       // a check for game over
-      if (moveSet.isGameover())
+      if (orderedMoves.isEmpty())
       {
          // the earlier the better
          return (GAMEOVER + ply) * player;
