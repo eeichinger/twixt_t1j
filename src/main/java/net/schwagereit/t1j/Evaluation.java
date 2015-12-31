@@ -10,6 +10,8 @@
 package net.schwagereit.t1j;
 import java.util.*;
 
+import lombok.NonNull;
+
 
 /**
  * Compute value of position and find critical pin.
@@ -88,7 +90,7 @@ public final class Evaluation
    /**
     * a Position on the board.
     */
-   static final class PinPosition
+   private static final class PinPosition
    {
       private final int x;
       private final int y;
@@ -129,7 +131,7 @@ public final class Evaluation
    /**
     * Data of a hole on the board.
     */
-   protected static final class FieldData
+   private static final class FieldData
    {
       private int value; // only used for set pins
 
@@ -225,6 +227,7 @@ public final class Evaluation
 
    private int stackcnt;
 
+   @NonNull
    private final Board board;
 
    private static final int BLOCKED_FIELD_VAL = 99;
@@ -746,12 +749,24 @@ public final class Evaluation
       + (Math.abs(thisData.getFatherX() - x) == 1 ? 1 : (Math
             .abs(thisData.getFatherX() - x) == 2 ? 3 : 0));
    }
-   
+
+   /**
+    * Compute value of situation. EvaluateY has to be called before.
+    * @param computeCritical Compute critical pin as well?
+    * @param nextPlayer Who's turn is next?
+    * @return value of situation. The smaller the better. '0' for game-over.
+    */
+   public int evaluateY(boolean computeCritical, int nextPlayer) {
+      evaluateY(nextPlayer);
+      final int val = valueOfY(computeCritical, nextPlayer);
+      return val;
+   }
+
    /**
     * Assign values to all own pins.
     * @param nextPlayer who is playing next
     */
-   void evaluateY(int nextPlayer)
+   private void evaluateY(int nextPlayer)
    {
       final int ymax = board.getYsize();
       int i, n, yi, pval, zval, col;
@@ -856,7 +871,7 @@ public final class Evaluation
     * @param nextPlayer Who's turn is next?
     * @return value of situation. The smaller the better. '0' for game-over.
     */
-   int valueOfY(final boolean computeCritical, final int nextPlayer)
+   private int valueOfY(final boolean computeCritical, final int nextPlayer)
    {
       int bestVal = BLOCKED_FIELD_VAL * MULT, checkX, checkY;
       int bestValTenth = bestVal / 10;

@@ -94,7 +94,7 @@ public final class Board
 
    private final Node[][] field = new Node[MAXDIM + MARGIN * 2][MAXDIM + MARGIN * 2];
    
-   private Evaluation eval;
+   private final Evaluation eval;
 
    /**
     * Cons'tor - no external instance.
@@ -107,7 +107,7 @@ public final class Board
          {
             field[i][j] = new Node();
          }
-      setEval(new Evaluation(this));
+      eval = new Evaluation(this);
       zobristEnabled = false;
       zobristValue = 0;
    }
@@ -331,7 +331,7 @@ public final class Board
    }
 
    /**
-    * set a pin with bondary-checks. Input data is corrected (+MARGIN).
+    * set a pin with boundary-checks. Input data is corrected (+MARGIN).
     *
     * @param xin
     *           x
@@ -630,22 +630,12 @@ public final class Board
    }
 
    /**
-    * Set the Evaluation-object for this board.
-    * @param evalIn The eval to set.
-    */
-   private void setEval(final Evaluation evalIn)
-   {
-      this.eval = evalIn;
-   }
-   
-   /**
     * Check if game is over for the evaluation connected with this board.
     * @return true, if game is over
     */
    public boolean checkGameOver()
    {
-      eval.evaluateY(Board.XPLAYER);
-      return (eval.valueOfY(false, Board.XPLAYER) == 0);
+      return (eval.evaluateY(false, Board.XPLAYER) == 0);
    }
 
    /**

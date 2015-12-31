@@ -17,7 +17,7 @@ import lombok.NonNull;
 
 /**
  * Generate all moves and try to find best one. This class is a singleton.
- * 
+ *
  * @author Johannes Schwagereit (mail(at)johannes-schwagereit.de)
  */
 public final class FindMove
@@ -43,6 +43,10 @@ public final class FindMove
    private boolean usealphabeta;
    @NonNull
    private final GeneralSettings generalSettings;
+   @NonNull
+   private final MoveGenerator moveGenerator;
+   @NonNull
+   private final InitialMoves initialMoveGenerator;
 
    /**
     * Cons'tor - no external instance.
@@ -56,11 +60,13 @@ public final class FindMove
    {
       this.match = match;
       this.generalSettings = generalSettings;
+      this.moveGenerator = new MoveGenerator(match);
+      this.initialMoveGenerator = InitialMoves.getInstance();
    }
 
    /**
     * Find best move for computerplayer.
-    * 
+    *
     * @param player X- or Y-player, the next player
     * @return a computermove
     */
@@ -68,7 +74,7 @@ public final class FindMove
    {
       currentPlayer = player;
       // the first pins are set by simple rules
-      Move initMove = InitialMoves.getInstance().initialMove(match, player);
+      Move initMove = initialMoveGenerator.initialMove(match, player);
       if (initMove != null)
       {
          // if move was found
@@ -87,7 +93,7 @@ public final class FindMove
 
       internalComputeMove(player);
 
-      System.out.println("Elapsed: " + clock.getTime() + " msec.");
+      System.out.println("Elapsed: " + clock.getElapsedMillis() + " msec.");
 
       return bestMove;
    }
@@ -113,17 +119,19 @@ public final class FindMove
       }
 
       // use alpha-beta
-      GenerateMoveContext generateMoveContext = new GenerateMoveContext();
+      ComputeMoveContext computeMoveContext = new ComputeMoveContext();
       usealphabeta = false;
       for (int currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
          if (currentMaxPly != 4 || currentMaxPly == maxPly)
          {
             zobristMap.clear();
-            alphaBeta(generateMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+            alphaBeta(computeMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             usealphabeta = true;
             if (isThinkingTimeExceeded())
+            {
                break;
+            }
          }
       }
    }
@@ -138,10 +146,8 @@ public final class FindMove
       int val1, val2;
 
       // evaluate
-      match.getBoardY().getEval().evaluateY(player);
-      val1 = match.getBoardY().getEval().valueOfY(false, player);
-      match.getBoardX().getEval().evaluateY(-player);
-      val2 = match.getBoardX().getEval().valueOfY(false, -player);
+      val1 = match.getBoardY().getEval().evaluateY(false, player);
+      val2 = match.getBoardX().getEval().evaluateY(false, -player);
 
 
       // at the first move only defensive moves are good
@@ -190,13 +196,13 @@ public final class FindMove
    /**
     * Recursive minimax with alpha-beta pruning to find best move.
     * @param player player who has next turn
-    * @param currentMaxPly current max depth
+    * @param maxPly max depth
     * @param ply current depth, decreasing
     * @param alpha alpha-value
     * @param beta beta-value
     * @return value computed
     */
-   private int alphaBeta(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta)
+   private int alphaBeta(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta)
    {
       int val;
       Move move;
@@ -211,8 +217,7 @@ public final class FindMove
          return positionValue(player);
       }
 
-      MoveGenerator moveSet = new MoveGenerator(match);
-      List<Move> orderedMoves = moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
+      List<Move> orderedMoves = moveGenerator.generateMoves(computeMoveContext, player, ply == maxPly);
 
       // a check for game over
       if (orderedMoves.isEmpty())
@@ -224,32 +229,32 @@ public final class FindMove
       // minimizing node
       if (player == Board.XPLAYER)
       {
-         return evaluateMoveSetX(generateMoveContext, Board.XPLAYER, currentMaxPly, ply, alpha, beta, orderedMoves);
+         return evaluateMoveSetX(computeMoveContext, Board.XPLAYER, maxPly, ply, alpha, beta, orderedMoves);
       }
       else
       //maximizing node
       {
-         return evaluateMoveSetY(generateMoveContext, player, currentMaxPly, ply, alpha, beta, orderedMoves);
+         return evaluateMoveSetY(computeMoveContext, player, maxPly, ply, alpha, beta, orderedMoves);
       }
    }
 
-   private int evaluateMoveSetY(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluateMoveSetY(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (generateMoveContext, -player, currentMaxPly, ply - 1, alpha, beta);
+         val = alphaBeta (computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
          // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
-         if (ply == currentMaxPly)
+         if (ply == maxPly)
          {
-            generateMoveContext.addValuedMove(move, val);
+            computeMoveContext.addValuedMove(move, val);
          }
          if (val > alpha)
          {
-            if (ply == currentMaxPly)
+            if (ply == maxPly)
             {
                // a new best move is only accepted if time is not over
-               if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
+               if (!isThinkingTimeExceeded())
                {
                   bestMove = move;
                }
@@ -267,7 +272,7 @@ public final class FindMove
             else
             {
                alpha = val;
-               generateMoveContext.addKiller(move, player);
+               computeMoveContext.addKiller(move, player);
             }
          }
 
@@ -281,17 +286,17 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluateMoveSetX(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluateMoveSetX(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (generateMoveContext, -player, currentMaxPly, ply - 1, alpha, beta);
+         val = alphaBeta (computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
          //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
 
-         if (ply == currentMaxPly)
+         if (ply == maxPly)
          {
-            generateMoveContext.addValuedMove(move, val);
+            computeMoveContext.addValuedMove(move, val);
          }
 
          if (val < beta)
@@ -299,10 +304,10 @@ public final class FindMove
             //
             //
             //
-            if (ply == currentMaxPly)
+            if (ply == maxPly)
             {
                // a new best move is only accepted if time is not over
-               if (maxTime <= 0 || maxTime * MILLI_PER_SEC > clock.getTime())
+               if (!isThinkingTimeExceeded())
                {
                   bestMove = move;
                }
@@ -320,7 +325,7 @@ public final class FindMove
             else
             {
                beta = val;
-               generateMoveContext.addKiller(move, player);
+               computeMoveContext.addKiller(move, player);
             }
          }
          unmakeMove(move, player);
@@ -338,7 +343,7 @@ public final class FindMove
    }
 
    private boolean isThinkingTimeExceeded() {
-      return maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getTime();
+      return maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getElapsedMillis();
    }
 
    private int positionValue(int player) {

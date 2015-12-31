@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Erich Eichinger
  * @since 31/12/2015
  */
-public class GenerateMoveContext {
+public class ComputeMoveContext {
    private static final int INITIAL_CAPACITY = 30;
 
    private final List<ValuedMove> valuedMoves = new ArrayList<ValuedMove>(INITIAL_CAPACITY);

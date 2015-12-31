@@ -32,7 +32,7 @@ final class Stopwatch
     * 
     * @return time elapsed.
     */
-   public long getTime()
+   public long getElapsedMillis()
    {
       return System.currentTimeMillis() - start;
    }

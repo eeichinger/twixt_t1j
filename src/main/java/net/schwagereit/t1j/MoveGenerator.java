@@ -20,7 +20,6 @@ import lombok.NonNull;
  */
 final class MoveGenerator
 {
-
    @NonNull
    private final CheckPattern checkpattern;
    @NonNull
@@ -43,7 +42,7 @@ final class MoveGenerator
     * @param isMaxPly true if current ply is starting ply
     * @return list of promising moves for player. if empty -> game over
     */
-   public final List<Move> generateMoves(GenerateMoveContext generateMoveContext, final int player, boolean isMaxPly)
+   public final List<Move> generateMoves(ComputeMoveContext generateMoveContext, final int player, boolean isMaxPly)
    {
       List<Move> orderedMoves;
       if ( isMaxPly && generateMoveContext.hasValuedMoves())
@@ -74,8 +73,7 @@ final class MoveGenerator
       Evaluation oppEval = oppBoard.getEval();
 
       // eval for opponent
-      oppEval.evaluateY(Board.YPLAYER);
-      int oppVal = oppEval.valueOfY(true, Board.YPLAYER);
+      int oppVal = oppEval.evaluateY(true, Board.YPLAYER);
 
       // gameover?
       if (oppVal == 0)
@@ -84,8 +82,7 @@ final class MoveGenerator
       }
 
       // own eval
-      ownEval.evaluateY(Board.YPLAYER);
-      ownEval.valueOfY(true, Board.YPLAYER);
+      ownEval.evaluateY(true, Board.YPLAYER);
 
       // check own critical points
       Set<Evaluation.CritPos> s = ownEval.getCritical();
