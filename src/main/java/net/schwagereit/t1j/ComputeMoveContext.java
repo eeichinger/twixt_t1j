@@ -21,9 +21,19 @@ public class ComputeMoveContext {
    // 1st for X, 2nd for Y
    private final Map<Move, Number>[] killerMoves = newArray(new HashMap<Move, Number>(), new HashMap<Move, Number>());
 
+   private Move bestMove;
+
    @SafeVarargs
    private static <T> T[] newArray(T... items) {
       return items;
+   }
+
+   public Move getBestMove() {
+      return bestMove;
+   }
+
+   public void setBestMove(Move bestMove) {
+      this.bestMove = bestMove;
    }
 
    public boolean hasValuedMoves() {

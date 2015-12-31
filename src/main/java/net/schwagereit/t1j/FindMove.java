@@ -30,9 +30,6 @@ public final class FindMove
    @NonNull
    private final Match match;
 
-   /** the bestMove found yet */
-   private Move bestMove;
-
    private int maxTime;
 
    private int currentPlayer;
@@ -91,7 +88,7 @@ public final class FindMove
 
       clock = new Stopwatch();
 
-      internalComputeMove(player);
+      Move bestMove = internalComputeMove(player);
 
       System.out.println("Elapsed: " + clock.getElapsedMillis() + " msec.");
 
@@ -103,7 +100,7 @@ public final class FindMove
     *
     * @param player X- or Y-player, the next player
     */
-   private void internalComputeMove(final int player)
+   private Move internalComputeMove(final int player)
    {
       int maxPly;
       if (generalSettings.mdFixedPly)
@@ -134,6 +131,8 @@ public final class FindMove
             }
          }
       }
+
+      return computeMoveContext.getBestMove();
    }
 
    /**
@@ -257,7 +256,7 @@ public final class FindMove
                // a new best move is only accepted if time is not over
                if (!isThinkingTimeExceeded())
                {
-                  bestMove = move;
+                  computeMoveContext.setBestMove(move);
                }
 
 //                  if (currentMaxPly < maxPly)
@@ -310,7 +309,7 @@ public final class FindMove
                // a new best move is only accepted if time is not over
                if (!isThinkingTimeExceeded())
                {
-                  bestMove = move;
+                  computeMoveContext.setBestMove(move);
                }
 
                //if (currentMaxPly < maxPly)
