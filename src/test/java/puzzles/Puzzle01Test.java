@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 import net.schwagereit.t1j.Board;
+import net.schwagereit.t1j.CheckPattern;
 import net.schwagereit.t1j.FindMove;
 import net.schwagereit.t1j.GeneralSettings;
 import net.schwagereit.t1j.LoadSave;
@@ -24,6 +25,7 @@ public class Puzzle01Test {
    @Test
    public void testGame() {
       BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("puzzle01.T1")));
+      CheckPattern.getInstance().loadPattern();
       Zobrist.getInstance().initialize();
 
       Match match = new Match();
