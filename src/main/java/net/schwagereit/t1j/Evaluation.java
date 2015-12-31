@@ -85,6 +85,26 @@ public final class Evaluation
       {
          return new Move(x ,y) + "-" + dir;
       }
+
+      @Override
+      public boolean equals(Object o) {
+         if (this == o) return true;
+         if (o == null || getClass() != o.getClass()) return false;
+
+         CritPos critPos = (CritPos) o;
+
+         if (x != critPos.x) return false;
+         if (y != critPos.y) return false;
+         return dir == critPos.dir;
+
+      }
+
+      @Override
+      public int hashCode() {
+         int result = (x << 5) + y;
+         result = 31 * result + (dir ? 1 : 0);
+         return result;
+      }
    }
 
    /**
