@@ -8,7 +8,6 @@
  ***************************************************************************/
 package net.schwagereit.t1j;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import lombok.NonNull;
@@ -136,12 +135,6 @@ final class OrderedMoves
 
    }
 
-   private Iterator moveIterator;
-
-   // private final int ply;
-   // private final int maxPly;
-   //private int currentPlayer;
-
    private boolean gameover;
 
    @NonNull
@@ -165,17 +158,19 @@ final class OrderedMoves
     * @param player X- or Y-player, the next player
     * @param isMaxPly true if current ply is starting ply
     */
-   public final void generateMoves(GenerateMoveContext generateMoveContext, final int player, boolean isMaxPly)
+   public final List<Move> generateMoves(GenerateMoveContext generateMoveContext, final int player, boolean isMaxPly)
    {
+      List<Move> orderedMoves;
       if ( isMaxPly && generateMoveContext.hasValuedMoves())
       {
-         List<Move> orderedMoves = generateMoveContext.getSortedMoves(player);
-         moveIterator = orderedMoves.iterator();
+         orderedMoves = generateMoveContext.getSortedMoves(player);
       }
       else
       {
-         generateNewMoves(generateMoveContext, player);
+         Set<Move> generatedMoves = generateNewMoves(player);
+         orderedMoves = generateMoveContext.sortMoves(generatedMoves, player);
       }
+      return orderedMoves;
    }
 
    /**
@@ -183,7 +178,7 @@ final class OrderedMoves
     *
     * @param player X- or Y-player, the next player
     */
-   public final void generateNewMoves(GenerateMoveContext generateMoveContext, final int player)
+   private Set<Move> generateNewMoves(final int player)
    {
       //currentPlayer = player;
 
@@ -202,7 +197,7 @@ final class OrderedMoves
       if (oppVal == 0)
       {
          gameover = true;
-         return;
+         return new HashSet<>();
       }
 
       // own eval
@@ -315,9 +310,7 @@ final class OrderedMoves
          moves.add(randomMove(player));
       }
 
-      moveIterator = generateMoveContext.sortMoves(moves, player).iterator();
-      //orderedMoves = new ArrayList(moves);
-
+      return moves;
    }
 
    /**
@@ -345,22 +338,6 @@ final class OrderedMoves
    public final boolean isGameover()
    {
       return gameover;
-   }
-
-   /**
-    * Return next move found.
-    * @return move or null
-    */
-   public final Move getMove()
-   {
-      if (moveIterator.hasNext())
-      {
-         return (Move) moveIterator.next();
-      }
-      else
-      {
-         return null;
-      }
    }
 
    @SafeVarargs

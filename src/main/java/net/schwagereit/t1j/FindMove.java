@@ -8,6 +8,7 @@
  ***************************************************************************/
 package net.schwagereit.t1j;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -34,12 +35,9 @@ public final class FindMove
 
    private int maxTime;
 
-   /** The searchddepth currently used */
-   private int currentMaxPly;
-
    private int currentPlayer;
 
-   private final Map zobristMap = new HashMap(INITIAL_CAPACITY);
+   private final Map<Integer,Integer> zobristMap = new HashMap<>(INITIAL_CAPACITY);
    private Stopwatch clock;
    /** use alphabeta for highest ply. */
    private boolean usealphabeta;
@@ -117,12 +115,12 @@ public final class FindMove
       // use alpha-beta
       OrderedMoves.GenerateMoveContext generateMoveContext = new OrderedMoves.GenerateMoveContext();
       usealphabeta = false;
-      for (currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
+      for (int currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
          if (currentMaxPly != 4 || currentMaxPly == maxPly)
          {
             zobristMap.clear();
-            alphaBeta(generateMoveContext, player, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+            alphaBeta(generateMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             usealphabeta = true;
             if (isThinkingTimeExceeded())
                break;
@@ -192,12 +190,13 @@ public final class FindMove
    /**
     * Recursive minimax with alpha-beta pruning to find best move.
     * @param player player who has next turn
+    * @param currentMaxPly current max depth
     * @param ply current depth, decreasing
     * @param alpha alpha-value
     * @param beta beta-value
     * @return value computed
     */
-   private int alphaBeta(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta)
+   private int alphaBeta(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta)
    {
       int val;
       Move move;
@@ -213,7 +212,7 @@ public final class FindMove
       }
 
       OrderedMoves moveSet = new OrderedMoves(match);
-      moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
+      List<Move> orderedMoves = moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
 
       // a check for game over
       if (moveSet.isGameover())
@@ -225,22 +224,21 @@ public final class FindMove
       // minimizing node
       if (player == Board.XPLAYER)
       {
-         return evaluateMoveSetX(generateMoveContext, Board.XPLAYER, ply, alpha, beta, moveSet);
+         return evaluateMoveSetX(generateMoveContext, Board.XPLAYER, currentMaxPly, ply, alpha, beta, orderedMoves);
       }
       else
       //maximizing node
       {
-         return evaluateMoveSetY(generateMoveContext, player, ply, alpha, beta, moveSet);
+         return evaluateMoveSetY(generateMoveContext, player, currentMaxPly, ply, alpha, beta, orderedMoves);
       }
    }
 
-   private int evaluateMoveSetY(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
-      Move move;
+   private int evaluateMoveSetY(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
-      while ((move = moveSet.getMove()) != null)
+      for(Move move:orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (generateMoveContext, -player, ply - 1, alpha, beta);
+         val = alphaBeta (generateMoveContext, -player, currentMaxPly, ply - 1, alpha, beta);
          // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
          if (ply == currentMaxPly)
          {
@@ -283,13 +281,12 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluateMoveSetX(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int ply, int alpha, int beta, OrderedMoves moveSet) {
-      Move move;
+   private int evaluateMoveSetX(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
-      while ((move = moveSet.getMove()) != null)
+      for(Move move:orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (generateMoveContext, -player, ply - 1, alpha, beta);
+         val = alphaBeta (generateMoveContext, -player, currentMaxPly, ply - 1, alpha, beta);
          //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
 
          if (ply == currentMaxPly)
@@ -346,15 +343,15 @@ public final class FindMove
 
    private int positionValue(int player) {
       int val;
-      Object zobristVal=zobristMap.get(new Integer(match.getBoardY().getZobristValue()));
+      Integer zobristVal=zobristMap.get(match.getBoardY().getZobristValue());
       if (zobristVal != null)
       {
          //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-         return ((Integer) zobristVal).intValue();
+         return zobristVal;
       }
       //return evaluatePosition(player);
       val = evaluatePosition(player);
-      zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
+      zobristMap.put(match.getBoardY().getZobristValue(), val);
       return val;
    }
 
