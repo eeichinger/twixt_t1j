@@ -113,7 +113,7 @@ public final class FindMove
       }
 
       // use alpha-beta
-      OrderedMoves.GenerateMoveContext generateMoveContext = new OrderedMoves.GenerateMoveContext();
+      GenerateMoveContext generateMoveContext = new GenerateMoveContext();
       usealphabeta = false;
       for (int currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
@@ -196,7 +196,7 @@ public final class FindMove
     * @param beta beta-value
     * @return value computed
     */
-   private int alphaBeta(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta)
+   private int alphaBeta(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta)
    {
       int val;
       Move move;
@@ -211,7 +211,7 @@ public final class FindMove
          return positionValue(player);
       }
 
-      OrderedMoves moveSet = new OrderedMoves(match);
+      MoveGenerator moveSet = new MoveGenerator(match);
       List<Move> orderedMoves = moveSet.generateMoves(generateMoveContext, player, ply == currentMaxPly);
 
       // a check for game over
@@ -233,7 +233,7 @@ public final class FindMove
       }
    }
 
-   private int evaluateMoveSetY(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluateMoveSetY(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
@@ -281,7 +281,7 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluateMoveSetX(OrderedMoves.GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluateMoveSetX(GenerateMoveContext generateMoveContext, int player, int currentMaxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
