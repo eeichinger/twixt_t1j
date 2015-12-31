@@ -40,7 +40,7 @@ final class MoveGenerator
     *
     * @param player X- or Y-player, the next player
     * @param isMaxPly true if current ply is starting ply
-    * @return list of promising moves for player. if empty -> game over
+    * @return list of promising moves for player in order of descending expectation value. if empty -> game over
     */
    public final List<Move> generateMoves(ComputeMoveContext generateMoveContext, final int player, boolean isMaxPly)
    {

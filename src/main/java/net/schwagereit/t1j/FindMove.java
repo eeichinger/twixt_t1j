@@ -212,33 +212,34 @@ public final class FindMove
          return 0;
       }
 
-      if (isLeafPly(ply))
+      if (ply == 0)
       {
          return positionValue(player);
       }
 
-      List<Move> orderedMoves = moveGenerator.generateMoves(computeMoveContext, player, ply == maxPly);
+      // generate list of move candidates, most promising first
+      List<Move> promisingMoves = moveGenerator.generateMoves(computeMoveContext, player, ply == maxPly);
 
       // a check for game over
-      if (orderedMoves.isEmpty())
+      if (promisingMoves.isEmpty())
       {
          // the earlier the better
          return (GAMEOVER + ply) * player;
       }
 
-      // minimizing node
       if (player == Board.XPLAYER)
+      // minimizing node
       {
-         return evaluateMoveSetX(computeMoveContext, Board.XPLAYER, maxPly, ply, alpha, beta, orderedMoves);
+         return evaluatePromisingMovesX(computeMoveContext, Board.XPLAYER, maxPly, ply, alpha, beta, promisingMoves);
       }
       else
       //maximizing node
       {
-         return evaluateMoveSetY(computeMoveContext, player, maxPly, ply, alpha, beta, orderedMoves);
+         return evaluatePromisingMovesY(computeMoveContext, Board.YPLAYER, maxPly, ply, alpha, beta, promisingMoves);
       }
    }
 
-   private int evaluateMoveSetY(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluatePromisingMovesY(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
@@ -286,7 +287,7 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluateMoveSetX(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluatePromisingMovesX(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
       int val;
       for(Move move:orderedMoves)
       {
@@ -336,10 +337,6 @@ public final class FindMove
          }
       }
       return beta;
-   }
-
-   private boolean isLeafPly(int ply) {
-      return ply == 0;
    }
 
    private boolean isThinkingTimeExceeded() {
