@@ -38,6 +38,8 @@ public class Puzzle01Test {
 
       Move move = findMove.computeMove(Board.YPLAYER);
 
+      System.out.println("found move " + move);
+
       // TODO: not the correct solution yet, but serves as regression test for structural refactoring
       assertThat(move.getX(), equalTo(1));
       assertThat(move.getY(), equalTo(5));
