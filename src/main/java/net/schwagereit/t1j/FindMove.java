@@ -360,6 +360,11 @@ public final class FindMove
       }
       val = evaluatePosition(player);
       evaluatedBoardPositionCache.put(match.getBoardY().getZobristValue(), val);
+
+      final int analysedPositions = evaluatedBoardPositionCache.size();
+      if (analysedPositions % 1000 == 0) {
+//         System.out.println("analysed positions " + analysedPositions);
+      }
       return val;
    }
 
