@@ -39,7 +39,7 @@ public final class Board
        * Copy all values from a source-node to another node.
        * @param source the source
        */
-      public void getValues(Node source)
+      public void copyFrom(Node source)
       {
          value = source.value;
          bridge[0] = source.bridge[0];
@@ -72,14 +72,53 @@ public final class Board
    /** border around field. */
    private static final int MARGIN = 3;
 
+   /** max required field array size */
+   private static final int MAXBOARDSIZE = MAXDIM + MARGIN * 2;
+
    /** value of bridge if bridge was layed. */
    private static final int BRIDGED = 10;
 
    /** Multiplier */
    private static final int MULT = 1000;
 
-   /** the Zobristmatrix. */
+   /** the Zobrist value generator */
    private static final Zobrist ZOBRIST = Zobrist.getInstance();
+
+   /**
+    * Get one of the two existing board.
+    * (Sort of factory pattern.)
+    *
+    * @param player orientation of the board
+    * @return the Board
+    */
+   public static Board getBoard(final int player)
+   {
+      if (player == XPLAYER)
+      {
+         return BOARD_X; // mirrored board
+      }
+      else
+      {
+         return BOARD_Y; // main board
+      }
+   }
+
+   /**
+    * get board to display.
+    * @return board
+    */
+   public static Board getBoardDisplay()
+   {
+      return BOARD_DISP;
+   }
+
+   /**
+    * Copy all data from the y-board to the display-board.
+    */
+   public static void copyYtoDisplay()
+   {
+      BOARD_DISP.copyFrom(BOARD_Y);
+   }
 
    /** This board used for zobrist-hashing. */
    private boolean zobristEnabled;
@@ -92,7 +131,7 @@ public final class Board
    /** size of board. */
    private int xsize, ysize;
 
-   private final Node[][] field = new Node[MAXDIM + MARGIN * 2][MAXDIM + MARGIN * 2];
+   private final Node[][] field = new Node[MAXBOARDSIZE][MAXBOARDSIZE];
    
    private final Evaluation eval;
 
@@ -113,22 +152,18 @@ public final class Board
    }
 
    /**
-    * Get one of the two existing board.
-    * (Sort of factory pattern.)
-    *
-    * @param player orientation of the board
-    * @return the Board
+    * Copy all data from the y-board to the display-board.
     */
-   public static Board getBoard(final int player)
+   public void copyFrom(Board other)
    {
-      if (player == XPLAYER)
-      {
-         return BOARD_X; // mirrored board
-      }
-      else
-      {
-         return BOARD_Y; // main board
-      }
+      this.xsize = other.xsize;
+      this.ysize = other.ysize;
+      // TODO: do we really need to copy the "max" board size or is xsize/ysize enough
+      for (int i = 0; i < MAXBOARDSIZE; i++)
+         for (int j = 0; j < MAXBOARDSIZE; j++)
+         {
+            this.field[i][j].copyFrom(other.field[i][j]);
+         }
    }
 
    /**
@@ -173,11 +208,9 @@ public final class Board
     */
    public void clearBoard()
    {
-      Stopwatch clock = new Stopwatch();
-      clock.start();
       int i, j;
-      for (i = 0; i < field.length; i++)
-         for (j = 0; j < field[i].length; j++)
+      for (i = 0; i < MAXBOARDSIZE; i++)
+         for (j = 0; j < MAXBOARDSIZE; j++)
          {
             field[i][j].clear();
          }
@@ -491,7 +524,7 @@ public final class Board
    }
 
    /**
-    * Check if bridge allowed betweentwo points.
+    * Check if bridge allowed between two points.
     *
     * @param xa x of first pin
     * @param ya y of first pin
@@ -656,28 +689,6 @@ public final class Board
       return zobristValue;
    }
 
-
-   /**
-    * get board to display.
-    * @return board
-    */
-   public static Board getBoardDisplay()
-   {
-      return BOARD_DISP;
-   }
-
-   /**
-    * Copy all data from the y-board to the display-board.
-    */
-   public static void copyYtoDisplay()
-   {
-      BOARD_DISP.xsize = BOARD_Y.xsize;
-      BOARD_DISP.ysize = BOARD_Y.ysize;
-      for (int i = 0; i < BOARD_Y.field.length; i++)
-         for (int j = 0; j < BOARD_Y.field[i].length; j++)
-         {
-            BOARD_DISP.field[i][j].getValues(BOARD_Y.field[i][j]);
-         }
 
    }
 }
