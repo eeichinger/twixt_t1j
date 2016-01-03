@@ -49,6 +49,8 @@ public final class Board
       }
    }
 
+   /** perform various validations & checks */
+   public static final boolean DEBUG = false;
 
    /** playing East-West. */
    public static final int XPLAYER = 1;
@@ -176,11 +178,11 @@ public final class Board
     */
    public void setSize(final int xSize, final int ySize)
    {
-      if (xSize > MAXDIM || ySize > MAXDIM || xSize < MINDIM || ySize < MINDIM) // DEBUG?
-      {
-         throw new IllegalArgumentException("Size has to be between " + MINDIM + " and "
-               + MAXDIM + ".");
-      }
+      rejectIf(
+         xSize > MAXDIM || ySize > MAXDIM || xSize < MINDIM || ySize < MINDIM
+         , "Size has to be between " + MINDIM + " and "+ MAXDIM + "."
+      );
+
       xsize = xSize;
       ysize = ySize;
    }
@@ -229,10 +231,11 @@ public final class Board
     */
    private void setBridge(final int x, final int y, final int direction)
    {
-      if (direction > 3 || direction < 0) //DEBUG?
-      {
-         throw new IllegalArgumentException("direction " + direction + " is not allowed.");
-      }
+      rejectIf(
+         direction > 3 || direction < 0
+         , "direction " + direction + " is not allowed."
+      );
+
       if (field[x][y].bridge[direction] > 0)
       {
          return; //bridge cannot be layed because something is blocking me
@@ -507,11 +510,12 @@ public final class Board
     */
    public boolean isConnected(final int xa, final int ya, final int xb, final int yb)
    {
-      if (Math.abs(xa - xb) >= 3 || Math.abs(ya - yb) >= 3
-            || Math.abs(xa - xb) + Math.abs(ya - yb) != 3) //DEBUG?
-      {
-         throw new IllegalArgumentException("Wrong distance");
-      }
+      rejectIf(
+         Math.abs(xa - xb) >= 3 || Math.abs(ya - yb) >= 3
+            || Math.abs(xa - xb) + Math.abs(ya - yb) != 3
+         , "Wrong distance"
+      );
+
       //data is NOT corrected (margin!) here because isBridged corrects them
       //put lower first
       if (ya < yb)
@@ -534,11 +538,12 @@ public final class Board
     */
    public boolean isBridgeAllowed(final int xa, final int ya, final int xb, final int yb)
    {
-      if (Math.abs(xa - xb) >= 3 || Math.abs(ya - yb) >= 3
-            || Math.abs(xa - xb) + Math.abs(ya - yb) != 3) //DEBUG?
-      {
-         throw new IllegalArgumentException("Wrong distance");
-      }
+      rejectIf(
+         Math.abs(xa - xb) >= 3 || Math.abs(ya - yb) >= 3
+            || Math.abs(xa - xb) + Math.abs(ya - yb) != 3
+         , "Wrong distance"
+      );
+
       //data is NOT corrected (margin!) here because isBridged corrects them
       //put lower first
       if (ya < yb)
@@ -690,5 +695,12 @@ public final class Board
    }
 
 
+   @SuppressWarnings("PointlessBooleanExpression")
+   private static void rejectIf(boolean condition, String message) {
+      if (!DEBUG) return;
+      if (condition)
+      {
+         throw new IllegalArgumentException(message);
+      }
    }
 }
