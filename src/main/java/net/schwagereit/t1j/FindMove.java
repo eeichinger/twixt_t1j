@@ -34,7 +34,9 @@ public final class FindMove
 
    private int currentPlayer;
 
-   private final Map<Integer,Integer> zobristMap = new HashMap<>(INITIAL_CAPACITY);
+   // replace with specialized int2int map: http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/
+   private final Map<Integer,Integer> evaluatedBoardPositionCache = new HashMap<>(INITIAL_CAPACITY);
+
    private Stopwatch clock;
    /** use alphabeta for highest ply. */
    private boolean usealphabeta;
@@ -74,15 +76,8 @@ public final class FindMove
       Move initMove = initialMoveGenerator.initialMove(match, player);
       if (initMove != null)
       {
-         // if move was found
-         try
-         {
-            Thread.sleep(WAIT_MILLIS);
-         }
-         catch (InterruptedException e)
-         {
-            System.out.println("Sleep Interrupted");
-         }
+         // TODO: why?
+         releaseThreadTimeSlice();
          return initMove;
       }
 
@@ -93,6 +88,17 @@ public final class FindMove
       System.out.println("Elapsed: " + clock.getElapsedMillis() + " msec.");
 
       return bestMove;
+   }
+
+   private void releaseThreadTimeSlice() {
+      try
+      {
+         Thread.sleep(WAIT_MILLIS);
+      }
+      catch (InterruptedException e)
+      {
+         System.out.println("Sleep Interrupted");
+      }
    }
 
    /**
@@ -122,7 +128,7 @@ public final class FindMove
       {
          if (currentMaxPly != 4 || currentMaxPly == maxPly)
          {
-            zobristMap.clear();
+            evaluatedBoardPositionCache.clear();
             alphaBeta(computeMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             usealphabeta = true;
             if (isThinkingTimeExceeded())
@@ -344,14 +350,14 @@ public final class FindMove
 
    private int positionValue(int player) {
       int val;
-      Integer positionVal =zobristMap.get(match.getBoardY().getZobristValue());
+      Integer positionVal = evaluatedBoardPositionCache.get(match.getBoardY().getZobristValue());
       if (positionVal != null)
       {
          //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
          return positionVal;
       }
       val = evaluatePosition(player);
-      zobristMap.put(match.getBoardY().getZobristValue(), val);
+      evaluatedBoardPositionCache.put(match.getBoardY().getZobristValue(), val);
       return val;
    }
 
