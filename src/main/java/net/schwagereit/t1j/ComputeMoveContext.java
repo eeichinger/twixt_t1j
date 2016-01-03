@@ -1,6 +1,7 @@
 package net.schwagereit.t1j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * @author Erich Eichinger
@@ -41,17 +43,17 @@ public class ComputeMoveContext {
    }
 
    public List<Move> getSortedMoves(int player) {
-      List<Move> orderedMoves = new ArrayList<>(valuedMoves.size());
-      Collections.sort(valuedMoves, new Comparator<ValuedMove>() {
+      ValuedMove[] valuedMovesArray = valuedMoves.toArray(new ValuedMove[valuedMoves.size()]);
+      valuedMoves.clear();
+      Arrays.sort(valuedMovesArray, new Comparator<ValuedMove>() {
          public int compare(ValuedMove o1, ValuedMove o2) {
             return ((o1).value - (o2).value) * player;
          }
       });
-      for (Iterator<ValuedMove> iterator = valuedMoves.iterator(); iterator.hasNext(); ) {
-         ValuedMove valuedMove = iterator.next();
+      List<Move> orderedMoves = new ArrayList<>(valuedMovesArray.length);
+      for(ValuedMove valuedMove:valuedMovesArray) {
          orderedMoves.add(valuedMove.move);
       }
-      valuedMoves.clear();
       return orderedMoves;
    }
 
@@ -97,10 +99,10 @@ public class ComputeMoveContext {
     * @param player next Player
     * @return sorted list
     */
-   public List<Move> sortMoves(Set<Move> moves, int player) {
+   public List<Move> sortMovesByHits(Set<Move> moves, int player) {
       final int ref = (player == Board.XPLAYER) ? 0 : 1;
-      List<Move> list = new ArrayList<Move>(moves);
-      Collections.sort(list, new Comparator<Move>() {
+      List<Move> list = new ArrayList<>(moves);
+      list.sort(new Comparator<Move>() {
          public int compare(Move oOne, Move oTwo) {
             return (getHits(oTwo, ref) - getHits(oOne, ref));
          }

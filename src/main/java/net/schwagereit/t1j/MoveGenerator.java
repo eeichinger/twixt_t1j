@@ -52,7 +52,7 @@ final class MoveGenerator
       else
       {
          Set<Move> generatedMoves = generateNewMoves(player);
-         orderedMoves = generateMoveContext.sortMoves(generatedMoves, player);
+         orderedMoves = generateMoveContext.sortMovesByHits(generatedMoves, player);
       }
       return orderedMoves;
    }

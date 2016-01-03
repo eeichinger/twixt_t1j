@@ -224,6 +224,7 @@ public final class FindMove
       }
 
       // generate list of move candidates, most promising first
+      // TODO: convert List to Collection
       List<Move> promisingMoves = moveGenerator.generateMoves(computeMoveContext, player, ply == maxPly);
 
       // a check for game over
