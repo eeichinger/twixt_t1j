@@ -80,9 +80,6 @@ public final class Board
    /** value of bridge if bridge was layed. */
    private static final int BRIDGED = 10;
 
-   /** Multiplier */
-   private static final int MULT = 1000;
-
    /** the Zobrist value generator */
    private static final Zobrist ZOBRIST = Zobrist.getInstance();
 
@@ -602,45 +599,6 @@ public final class Board
    {
       //the input data is corrected to reflect the margin
       return field[x + MARGIN][y + MARGIN].bridge[direction] == 0;
-   }
-
-   /**
-    * calculate ending point of bridge.
-    * 
-    * @param fromx
-    *           start-x
-    * @param fromy
-    *           start-y
-    * @param direction
-    *           direction of bridge
-    * @return x * 1000 + y
-    */
-   public static int bridgeEnd(final int fromx, final int fromy, final int direction)
-   {
-      int tox, toy;
-
-      switch (direction)
-      {
-      case 0:
-         tox = fromx - 2;
-         toy = fromy - 1;
-         break;
-      case 1:
-         tox = fromx - 1;
-         toy = fromy - 2;
-         break;
-      case 2:
-         tox = fromx + 1;
-         toy = fromy - 2;
-         break;
-      case 3:
-         tox = fromx + 2;
-         toy = fromy - 1;
-         break;
-      default:
-         throw new IllegalArgumentException("Unsupported direction");
-      }
-      return tox * MULT + toy;
    }
 
    /**

@@ -117,6 +117,6 @@ public final class Move
 
    public String toString()
    {
-      return GuiBoard.getHoleName(x, y, false);
+      return BoardLabels.holeName(x, y, false);
    }
 }

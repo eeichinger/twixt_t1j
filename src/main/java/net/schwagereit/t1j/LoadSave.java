@@ -15,7 +15,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -154,7 +153,7 @@ public final class LoadSave
          {
             x = match.getMoveX(i);
             y = match.getMoveY(i);
-            writer.write(GuiBoard.getHoleName(x, y, false) + LINESEP);
+            writer.write(BoardLabels.holeName(x, y, false) + LINESEP);
          }
 
       } catch (Exception e)

@@ -623,7 +623,7 @@ public final class Match extends Observable implements Runnable
 
       return new StringBuffer()
             .append(getMoveNr() <= 1 ? "" : System.getProperty("line.separator")).append(
-            getMoveNr()).append(".  ").append(GuiBoard.getHoleName(x, y, true)).toString();
+            getMoveNr()).append(".  ").append(BoardLabels.holeName(x, y, true)).toString();
    }
 
    /**

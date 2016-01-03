@@ -23,10 +23,6 @@ import javax.swing.JPanel;
  */
 public final class GuiBoard extends JPanel
 {
-   /** Array of column headers. */
-   static final String[] COL_NAMES = { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-         "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA",
-         "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ" };
 
    static final Color[][] colorSchemes = {
          {Color.red, Color.blue, Color.white, Color.gray.darker()},
@@ -81,20 +77,42 @@ public final class GuiBoard extends JPanel
    }
 
    /**
-    * get the name of given hole as String, e.g. D4
-    * @param x x
-    * @param y y
-    * @param withSpace print Move with spaces
+    * calculate ending point of bridge.
     *
-    * @return Name of Hole
+    * @param fromx
+    *           start-x
+    * @param fromy
+    *           start-y
+    * @param direction
+    *           direction of bridge
+    * @return x * 1000 + y
     */
-   public static String getHoleName(final int x, final int y, final boolean withSpace)
+   private static int bridgeEnd(final int fromx, final int fromy, final int direction)
    {
-      if (x < 0 || y < 0)
+      int tox, toy;
+
+      switch (direction)
       {
-         return "";
+      case 0:
+         tox = fromx - 2;
+         toy = fromy - 1;
+         break;
+      case 1:
+         tox = fromx - 1;
+         toy = fromy - 2;
+         break;
+      case 2:
+         tox = fromx + 1;
+         toy = fromy - 2;
+         break;
+      case 3:
+         tox = fromx + 2;
+         toy = fromy - 1;
+         break;
+      default:
+         throw new IllegalArgumentException("Unsupported direction");
       }
-      return "" + COL_NAMES[x] + (withSpace ? " " : "") + (y + 1);
+      return tox * 1000 + toy;
    }
 
    /**
@@ -145,15 +163,15 @@ public final class GuiBoard extends JPanel
       //horizontal
       int h = hInit;
       for (int i = 0; i < match.getXsize(); h += dist, i++)
-         g2.drawString(COL_NAMES[i], h, horBor);
+         g2.drawString(BoardLabels.xLabel(i), h, horBor);
        // TODO: just tmp help for games in Europaen notation, remove once notation selection is implemented
-//         g2.drawString(COL_NAMES[i] + "("+(i+1)+")", h, horBor);
+//         g2.drawString(ColumnNames.labelForX(i) + "("+(i+1)+")", h, horBor);
       //vertical
       h = hInit;
       for (int i = 1; i <= match.getYsize(); h += dist, i++)
          g2.drawString("" + i, verBor, h);
        // TODO: just tmp help for games in Europaen notation, remove once notation selection is implemented
-//         g2.drawString("" + i + "(" + COL_NAMES[i-1] + ")", verBor - 16, h);
+//         g2.drawString("" + i + "(" + ColumnNames.labelForX(i-1) + ")", verBor - 16, h);
    }
 
    /**
@@ -233,8 +251,8 @@ public final class GuiBoard extends JPanel
                   if (match.getBoardDisplay().isBridged(i, k, index))
                   {
                      final int mult = 1000;
-                     tox = Board.bridgeEnd(i, k, index) / mult;
-                     toy = Board.bridgeEnd(i, k, index) % mult;
+                     tox = bridgeEnd(i, k, index) / mult;
+                     toy = bridgeEnd(i, k, index) % mult;
                      int xvon = BEGIN_X + (i * this.dist) + diameter / 2;
                      int yvon = BEGIN_Y + (k * this.dist) + diameter / 2;
                      int xnach = BEGIN_X + (tox * this.dist) + diameter / 2;

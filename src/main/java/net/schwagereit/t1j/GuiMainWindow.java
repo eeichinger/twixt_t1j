@@ -508,7 +508,7 @@ public final class GuiMainWindow extends JFrame implements Observer
             }
             if (ax > 0 && ax <= sx && ay > 0 && ay <= sy)
             {
-               RightPanel.getInstance().setPosText(" " + GuiBoard.COL_NAMES[ax - 1] + ay);
+               RightPanel.getInstance().setPosText(" " + BoardLabels.xLabel(ax - 1) + ay);
             }
             if ((ax == 1 && ay == 1) || (ax == sx && ay == 1) || (ax == 1 && ay == sy)
                   || (ax == sx && ay == sy))
