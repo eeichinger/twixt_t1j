@@ -124,18 +124,22 @@ public final class FindMove
       // use alpha-beta
       ComputeMoveContext computeMoveContext = new ComputeMoveContext();
       usealphabeta = false;
+      evaluatedBoardPositionCache.clear();
       for (int currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
-         if (currentMaxPly != 4 || currentMaxPly == maxPly)
+         if (currentMaxPly == 4 && currentMaxPly != maxPly) continue;
+
+         System.out.println("refining ply " + currentMaxPly);
+
+         // TODO: use windowing?
+         alphaBeta(computeMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+         usealphabeta = true;
+         if (isThinkingTimeExceeded())
          {
-            evaluatedBoardPositionCache.clear();
-            alphaBeta(computeMoveContext, player, currentMaxPly, currentMaxPly, -Integer.MAX_VALUE, Integer.MAX_VALUE);
-            usealphabeta = true;
-            if (isThinkingTimeExceeded())
-            {
-               break;
-            }
+            break;
          }
+
+         System.out.println("analysed board positions " + evaluatedBoardPositionCache.size());
       }
 
       return computeMoveContext.getBestMove();
@@ -209,9 +213,6 @@ public final class FindMove
     */
    private int alphaBeta(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta)
    {
-      int val;
-      Move move;
-
       if (isThinkingTimeExceeded())
       {
          return 0;
