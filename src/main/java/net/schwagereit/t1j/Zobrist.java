@@ -14,8 +14,7 @@ import java.util.HashSet;
  */
 public class Zobrist
 {
-
-   final private class Node
+   final private static class Node
    {
       private int valueX; //value if pin set by XPlayer
       private int valueY; //value if pin set by YPlayer
@@ -23,15 +22,36 @@ public class Zobrist
       private final int[] bridge = new int[4];
    }
 
+   final private static class UniqueRng {
+      private final Random rand;
+
+      /** Set of already drawn numbers - avoid duplicates. */
+      private final Set<Integer> alreadyDrawn;
+
+      public UniqueRng(long seed) {
+         rand = new Random(seed);
+         alreadyDrawn = new HashSet<Integer>(700);
+      }
+
+      /**
+       * Get a random number. Avoid duplicates.
+       * @return int
+       */
+      int nextInt()
+      {
+         int val;
+         do
+         {
+            val = rand.nextInt();
+         } while (alreadyDrawn.contains(val));
+
+         alreadyDrawn.add(val);
+
+         return val;
+      }
+   }
 
    private static final Zobrist ourInstance = new Zobrist();
-
-   private final Node[][] field = new Node[Board.MAXDIM][Board.MAXDIM];
-
-   private final Random rand = new Random();
-
-   /** Set of already drawn numbers - avoid duplicates. */
-   private final Set alreadyDrawn = new HashSet(700);
 
    /**
     * Return the Zobrist-Object.
@@ -43,28 +63,30 @@ public class Zobrist
       return ourInstance;
    }
 
+   private final Node[][] field = new Node[Board.MAXDIM][Board.MAXDIM];
+
    /**
     * Constructor - no external instance.
     */
    private Zobrist()
    {
+      initialize();
    }
 
    /**
     * Initialize the data structure.
     */
-   public final void initialize()
+   private void initialize()
    {
+      UniqueRng uniqueRng = new UniqueRng(0);
+
       for (int j = 0; j < field.length; j++)
       {
          for (int i = 0; i < field.length; i++)
          {
-            fill(i,j);
+            fill(i,j, uniqueRng);
          }
       }
-      //never needed again
-      alreadyDrawn.clear();
-
    }
 
    /**
@@ -72,33 +94,16 @@ public class Zobrist
     * @param i x
     * @param j y
     */
-   private void fill(int i, int j)
+   private void fill(int i, int j, UniqueRng uniqueRng)
    {
       Node node = new Node();
-      node.valueX = getRandomInt();
-      node.valueY = getRandomInt();
-      node.bridge[0] = getRandomInt();
-      node.bridge[1] = getRandomInt();
-      node.bridge[2] = getRandomInt();
-      node.bridge[3] = getRandomInt();
+      node.valueX = uniqueRng.nextInt();
+      node.valueY = uniqueRng.nextInt();
+      node.bridge[0] = uniqueRng.nextInt();
+      node.bridge[1] = uniqueRng.nextInt();
+      node.bridge[2] = uniqueRng.nextInt();
+      node.bridge[3] = uniqueRng.nextInt();
       field[i][j] = node;
-   }
-
-   /**
-    * Get a random number. Avoid duplicates.
-    * @return int
-    */
-   private int getRandomInt()
-   {
-      int val;
-      do
-      {
-         val = rand.nextInt();
-      } while (alreadyDrawn.contains(new Integer(val)));
-
-      alreadyDrawn.add(new Integer(val));
-
-      return val;
    }
 
    /**

@@ -138,8 +138,6 @@ final class Control
 
       CheckPattern.getInstance().loadPattern();
 
-      Zobrist.getInstance().initialize();
-      
       match = new Match();
       MatchData matchData = new MatchData();
       matchData.loadPreferences();

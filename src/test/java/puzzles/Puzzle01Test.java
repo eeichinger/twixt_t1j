@@ -26,7 +26,6 @@ public class Puzzle01Test {
    public void solves_puzzle01() {
       BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("puzzle01.T1")));
       CheckPattern.getInstance().loadPattern();
-      Zobrist.getInstance().initialize();
 
       Match match = new Match();
       GeneralSettings settings = new GeneralSettings();

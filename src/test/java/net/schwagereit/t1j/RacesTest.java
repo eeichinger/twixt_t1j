@@ -14,7 +14,6 @@ public class RacesTest extends TestCase
    {
       bo = Board.getBoard(Board.YPLAYER);
       bo.setSize(24, 24);
-      Zobrist.getInstance().initialize();
    }
 
    
