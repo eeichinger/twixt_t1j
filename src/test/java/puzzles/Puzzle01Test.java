@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class Puzzle01Test {
 
    @Test
-   public void testGame() {
+   public void solves_puzzle01() {
       BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("puzzle01.T1")));
       CheckPattern.getInstance().loadPattern();
       Zobrist.getInstance().initialize();
@@ -39,6 +39,7 @@ public class Puzzle01Test {
 
       Move move = findMove.computeMove(Board.YPLAYER);
 
+      // TODO: not the correct solution yet, but serves as regression test for structural refactoring
       assertThat(move.getX(), equalTo(1));
       assertThat(move.getY(), equalTo(5));
    }

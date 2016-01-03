@@ -142,11 +142,11 @@ public final class FindMove
     */
    private int evaluatePosition(int player)
    {
-      int val1, val2;
+      int positionValY, positionValX;
 
       // evaluate
-      val1 = match.getBoardY().getEval().evaluateY(false, player);
-      val2 = match.getBoardX().getEval().evaluateY(false, -player);
+      positionValY = match.getBoardY().getEval().evaluateY(false, player);
+      positionValX = match.getBoardX().getEval().evaluateY(false, -player);
 
 
       // at the first move only defensive moves are good
@@ -154,15 +154,15 @@ public final class FindMove
       {
          if (currentPlayer == Board.YPLAYER)
          {
-            val1 = 0;
+            positionValY = 0;
          }
          else
          {
-            val2 = 0;
+            positionValX = 0;
          }
 
       }
-      return val2 - val1;
+      return positionValX - positionValY;
 
       //on equal moves, takes the one nearest to midth
       //vals = (vals << 7) + Math.abs(ownBoard.getXsize() / 2 - element.getX())
@@ -344,13 +344,12 @@ public final class FindMove
 
    private int positionValue(int player) {
       int val;
-      Integer zobristVal=zobristMap.get(match.getBoardY().getZobristValue());
-      if (zobristVal != null)
+      Integer positionVal =zobristMap.get(match.getBoardY().getZobristValue());
+      if (positionVal != null)
       {
          //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-         return zobristVal;
+         return positionVal;
       }
-      //return evaluatePosition(player);
       val = evaluatePosition(player);
       zobristMap.put(match.getBoardY().getZobristValue(), val);
       return val;
