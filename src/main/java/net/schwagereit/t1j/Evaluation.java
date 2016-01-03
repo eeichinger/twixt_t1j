@@ -93,16 +93,13 @@ public final class Evaluation
 
          CritPos critPos = (CritPos) o;
 
-         if (x != critPos.x) return false;
-         if (y != critPos.y) return false;
-         return dir == critPos.dir;
-
+         return (x == critPos.x) && (y == critPos.y) && (dir == critPos.dir);
       }
 
       @Override
       public int hashCode() {
-         int result = (x << 5) + y;
-         result = 31 * result + (dir ? 1 : 0);
+         int idir = (dir ? 1 : 0);
+         int result = ((x << 5) + y) << idir;
          return result;
       }
    }
@@ -264,7 +261,7 @@ public final class Evaluation
    private static final int BLOCKED_FIELD_VAL_MULT = BLOCKED_FIELD_VAL * MULT;
 
    /** set of all critical positions. */
-   private final Set<CritPos> critPoss = new HashSet<CritPos>();
+   private final Set<CritPos> critPoss = new HashSet<>();
 
    /** number of own pins in given row. */
    private final int[] noPins = new int[Board.MAXDIM];
@@ -617,7 +614,7 @@ public final class Evaluation
       for (int yi = yin; yi < board.getYsize(); yi++)
       {
          // break if other pin found (regardless of color)
-         if (calculateDistForY(xin, yi) && yi > yin + 1)
+         if (yi > yin + 1 && calculateDistForY(xin, yi))
          {
             break;
          }
@@ -628,7 +625,7 @@ public final class Evaluation
          for (int yi = yin - 1; yi < board.getYsize(); yi++)
          {
             // break if other pin found (regardless of color)
-            if (calculateDistForY(xin - 1, yi) && yi > yin + 2)
+            if (yi > yin + 2 && calculateDistForY(xin - 1, yi))
             {
                break;
             }
@@ -643,7 +640,7 @@ public final class Evaluation
          for (int yi = yin - 1; yi < board.getYsize(); yi++)
          {
             // break if other pin found (regardless of color)
-            if (calculateDistForY(xin + 1, yi) && yi > yin + 2)
+            if (yi > yin + 2 && calculateDistForY(xin + 1, yi))
             {
                break;
             }
@@ -681,7 +678,7 @@ public final class Evaluation
       for (int yi = yin - 1; yi < board.getYsize(); yi++)
       {
          // break if other pin found (regardless of color)
-         if (calculateDistForY(xin, yi) && yi > yin + 2)
+         if (yi > yin + 2 && calculateDistForY(xin, yi))
          {
             break;
          }
@@ -828,8 +825,9 @@ public final class Evaluation
                }
                // look to the right
                zval = getDistVal(col + 1, yi - 2) + MALUS_1;
-               if (board.pinAllowed(col + 1, yi - 2, Board.YPLAYER)
-                     && board.bridgeAllowed(col, yi, 2) && zval < pval)
+               if (zval < pval
+                     && board.pinAllowed(col + 1, yi - 2, Board.YPLAYER)
+                     && board.bridgeAllowed(col, yi, 2))
                {
                   pval = zval;
                   relevantXpos = data[col + 1][yi - 2].getFatherX();
@@ -839,8 +837,9 @@ public final class Evaluation
                
                // look to the far left
                zval = getDistVal(col - 2, yi - 1) + MALUS_2;
-               if (board.pinAllowed(col - 2, yi - 1, Board.YPLAYER)
-                     && board.bridgeAllowed(col, yi, 0) && zval < pval)
+               if (zval < pval
+                     && board.pinAllowed(col - 2, yi - 1, Board.YPLAYER)
+                     && board.bridgeAllowed(col, yi, 0))
                {
                   pval = zval;
                   relevantXpos = data[col - 2][yi - 1].getFatherX();
@@ -851,8 +850,9 @@ public final class Evaluation
                {
                   // look to the far right
                   zval = getDistVal(col + 2, yi - 1) + MALUS_2;
-                  if (board.pinAllowed(col + 2, yi - 1, Board.YPLAYER)
-                        && board.bridgeAllowed(col, yi, 3) && zval < pval)
+                  if (zval < pval
+                        && board.pinAllowed(col + 2, yi - 1, Board.YPLAYER)
+                        && board.bridgeAllowed(col, yi, 3))
                   {
                      pval = zval;
                      relevantXpos = data[col + 2][yi - 1].getFatherX();
@@ -898,7 +898,7 @@ public final class Evaluation
       int distTenth;
       int ySz = board.getYsize() - 1;
 
-      Set startingPoints = new HashSet();
+      Set<Move> startingPoints = new HashSet<Move>();
 
       for (int xi = 1; xi < board.getXsize() - 1; xi++) // each field of last row
       {
@@ -961,9 +961,9 @@ public final class Evaluation
       if (computeCritical)
       {
          critPoss.clear();
-         for (Iterator iterator = startingPoints.iterator(); iterator.hasNext();)
+         for (Iterator<Move> iterator = startingPoints.iterator(); iterator.hasNext();)
          {
-            Move move = (Move) iterator.next();
+            Move move = iterator.next();
             computeCritical(move.getX(), move.getY());
          }
       }
@@ -986,6 +986,8 @@ public final class Evaluation
 
       // critPoss.clear();
 
+      Set<CritPos> seen = new HashSet<>();
+
       do
       {  // if not in the last row and not empty in the first
          if (yc < board.getYsize() - 1 && board.getPin(xc, yc) == Board.YPLAYER)
@@ -1002,7 +1004,14 @@ public final class Evaluation
          {
             if (fp.getY() > 0)
             {
-               critPoss.add(new CritPos(fp.getX(), fp.getY(), CritPos.UP));
+               final CritPos cp = new CritPos(fp.getX(), fp.getY(), CritPos.UP);
+               if (seen.contains(cp)) {
+                  // TODO: it seems cycles are possible. Not sure if this is expected or a bug?
+                  finish = true;
+               } else {
+                  seen.add(cp);
+                  critPoss.add(cp);
+               }
             }
             thisData = data[fp.getX()][fp.getY()];
             if (thisData.getRelX() < 0 || fp.getY() == 0)
