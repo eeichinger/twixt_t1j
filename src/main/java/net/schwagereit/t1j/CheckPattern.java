@@ -46,8 +46,8 @@ public final class CheckPattern
    private static final int STRONG_NR = 6; // Strong 2
    private static final int NSTRONG_NR = 7;// Not Strong? 2
 
-   private final List offensivePatterns = new LinkedList();
-   private final List defensivePatterns = new LinkedList();
+   private final List<Pattern> offensivePatterns = new LinkedList<>();
+   private final List<Pattern> defensivePatterns = new LinkedList<>();
 
    /**
     * A Pattern consists of several PatternElements.
@@ -463,15 +463,14 @@ public final class CheckPattern
     * @param player Player for next move
     * @return a set of moves
     */
-   public Set<Move> findPatternMoves(boolean offense, Board board, Evaluation.CritPos critPos,
-                               int player)
+   public Set<Move> findPatternMoves(final boolean offense, final Board board, final Evaluation.CritPos critPos, final int player)
    {
       HashSet<Move> moves = new HashSet<Move>();
 
-      List patterns = offense ? offensivePatterns : defensivePatterns;
-      for (Iterator iterator = patterns.iterator(); iterator.hasNext();)
+      final List<Pattern> patterns = offense ? offensivePatterns : defensivePatterns;
+      for (Iterator<Pattern> iterator = patterns.iterator(); iterator.hasNext();)
       {
-         Pattern pattern = (Pattern) iterator.next();
+         Pattern pattern = iterator.next();
          pattern.checkPatternElements(moves, critPos, board, player, offense);
       } // for Patterns
       return moves;
