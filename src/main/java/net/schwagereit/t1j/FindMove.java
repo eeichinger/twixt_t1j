@@ -23,7 +23,7 @@ import lombok.Value;
  */
 public final class FindMove
 {
-   public static final boolean DEBUG = false;
+   public static final boolean DEBUG = true;
 
    private static final int INITIAL_CAPACITY = 10000;
    private static final int WAIT_MILLIS = 20;

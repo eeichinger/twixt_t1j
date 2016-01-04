@@ -40,7 +40,7 @@ public class Puzzle01Test {
       System.out.println("found move " + move);
 
       // TODO: not the correct solution yet, but serves as regression test for structural refactoring
-      assertThat(moveResult.getAnalysedPositions(), equalTo(351007));
+      assertThat(moveResult.getAnalysedPositions(), equalTo(350913));
       assertThat(move.getX(), equalTo(1));
       assertThat(move.getY(), equalTo(5));
    }
