@@ -385,7 +385,7 @@ public final class Match extends Observable implements Runnable
          cursor = frame.getCursor();
          frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-         move = findMove.computeMove(nextPlayer);
+         move = findMove.computeMove(nextPlayer).getMove();
          // System.out.println(moveNr);
 
          setGuiBlocked(false);

@@ -35,11 +35,12 @@ public class Puzzle01Test {
 
       final FindMove findMove = new FindMove(match, settings);
 
-      Move move = findMove.computeMove(Board.YPLAYER);
-
+      FindMove.ComputeMoveResult moveResult = findMove.computeMove(Board.YPLAYER);
+      Move move = moveResult.getMove();
       System.out.println("found move " + move);
 
       // TODO: not the correct solution yet, but serves as regression test for structural refactoring
+      assertThat(moveResult.getAnalysedPositions(), equalTo(351007));
       assertThat(move.getX(), equalTo(1));
       assertThat(move.getY(), equalTo(5));
    }

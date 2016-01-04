@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import lombok.NonNull;
+import lombok.Value;
 
 
 /**
@@ -67,13 +68,19 @@ public final class FindMove
       this.initialMoveGenerator = InitialMoves.getInstance();
    }
 
+   @Value
+   public static class ComputeMoveResult {
+      Move move;
+      int analysedPositions;
+   }
+
    /**
     * Find best move for computerplayer.
     *
     * @param player X- or Y-player, the next player
     * @return a computermove
     */
-   public Move computeMove(final int player)
+   public ComputeMoveResult computeMove(final int player)
    {
       currentPlayer = player;
       // the first pins are set by simple rules
@@ -82,12 +89,12 @@ public final class FindMove
       {
          // TODO: why?
          releaseThreadTimeSlice();
-         return initMove;
+         return new ComputeMoveResult(initMove, 0);
       }
 
       clock = new Stopwatch();
 
-      Move bestMove = internalComputeMove(player);
+      ComputeMoveResult bestMove = internalComputeMove(player);
 
       System.out.println("Elapsed: " + clock.getElapsedMillis() + " msec.");
 
@@ -110,7 +117,7 @@ public final class FindMove
     *
     * @param player X- or Y-player, the next player
     */
-   private Move internalComputeMove(final int player)
+   private ComputeMoveResult internalComputeMove(final int player)
    {
       int maxPly;
       if (generalSettings.mdFixedPly)
@@ -148,7 +155,7 @@ public final class FindMove
          System.out.println("analysed board positions " + evaluatedBoardPositionCache.size());
       }
 
-      return computeMoveContext.getBestMove();
+      return new ComputeMoveResult(computeMoveContext.getBestMove(), evaluatedBoardPositionCache.size());
    }
 
    /**
@@ -360,7 +367,7 @@ public final class FindMove
       // TODO: sadly despite a 70% cache hit ratio, we only get a performance improvement of ~10%
       cacheAccessCount++;
       if (cacheAccessCount % 10000 == 0) {
-         System.out.println(String.format("analysed positions cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
+         System.out.println(String.format("analysed distinct positions, cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
       }
       final Board boardY = match.getBoardY();
       Integer cacheKey = boardY.getZobristValue();
