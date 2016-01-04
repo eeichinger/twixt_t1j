@@ -369,8 +369,16 @@ public final class FindMove
       if (cacheAccessCount % 10000 == 0) {
          System.out.println(String.format("analysed distinct positions, cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
       }
+
       final Board boardY = match.getBoardY();
       Integer cacheKey = boardY.getZobristValue();
+
+/*
+      Board.BoardState boardState = null;
+      if (cacheKey == <offending cache key reported by System.err below>) {
+         boardState = boardY.captureState();
+      }
+*/
       Integer cachedScore = evaluatedBoardPositionCache.get(cacheKey);
       if (cachedScore != null)
       {
@@ -382,9 +390,17 @@ public final class FindMove
       evaluatedBoardPositionCache.put(cacheKey, calculatedScore);
 
       if (DEBUG && cachedScore != null && cachedScore != calculatedScore) {
-         // TODO: figure out why re-evaluating the board sometimes results in different scores?!?
-         System.err.println("cached/calculated score differ for same board position!");
-//         throw new IllegalStateException("cached/calculated score differ for same board position!");
+         // TODO: -> sad truth is, our zobrist keys are not unique - needs rework
+         System.err.println("cached/calculated score indicate cache key collision " + cacheKey);
+/*
+         Board.BoardState currentBoardState = boardY.captureState();
+
+         if (!currentBoardState.equals(cachedBoardState)) {
+            throw new IllegalStateException("key conflict " + cacheKey);
+         };
+
+         throw new IllegalStateException("cached/calculated score differ for same board position " + cacheKey);
+*/
       }
       return calculatedScore;
    }

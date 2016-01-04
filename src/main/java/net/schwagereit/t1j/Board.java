@@ -16,7 +16,42 @@ package net.schwagereit.t1j;
  */
 public final class Board
 {
-   public interface BoardListener {
+   public static class BoardState {
+      private final Node[][] field = new Node[MAXBOARDSIZE][MAXBOARDSIZE];
+
+      public BoardState(Board board) {
+         // TODO: do we really need to copy the "max" board size or is xsize/ysize enough
+         for (int i = 0; i < MAXBOARDSIZE; i++)
+         {
+            for (int j = 0; j < MAXBOARDSIZE; j++)
+            {
+               this.field[i][j] = new Node(board.field[i][j]);
+            }
+         }
+      }
+
+      public boolean equals(BoardState other)
+      {
+         for (int i = 0; i < MAXBOARDSIZE; i++)
+         {
+            for (int j = 0; j < MAXBOARDSIZE; j++)
+            {
+               if (!this.field[i][j].equals(other.field[i][j])) {
+                  return false;
+               }
+            }
+         }
+         return true;
+      }
+   }
+
+   public BoardState captureState()
+   {
+      return new BoardState(this);
+   }
+
+   public interface BoardListener
+   {
       void addForY(int x, int y);
       void removeForY(int x, int y, int player);
    }
