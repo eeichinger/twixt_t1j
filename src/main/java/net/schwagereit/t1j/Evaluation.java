@@ -495,71 +495,75 @@ public final class Evaluation
     */
    private boolean calculateDistForY(final int xi, final int yi)
    {
-      boolean pinFound = false;
-      if (yi <= 0)
+      if (yi < 0)
       {
-         if (yi < 0)
-         {
-            return false; // not allowed
-         }
-         // first line
-         data[xi][yi].setFather(xi, 0);
+         return false; // not allowed
+      }
+
+      if (yi == 0)
+      {
+         // first line is it's own father
+         data[xi][0].setFather(xi, 0);
          if (board.getPin(xi, yi) == Board.YPLAYER)
          { // own pin
-            data[xi][yi].setValue(0);
+            data[xi][0].setValue(0);
          }
+         return false;
+      }
+
+      boolean pinFound = false;
+
+      int faX, faY = UNUSED;
+      // blocking bridges?
+      if (board.isBridged(xi - 1, yi, 3) || board.isBridged(xi + 1, yi, 0))
+      {
+         faX = BLOCKED_FIELD_VAL;
+      }
+      else if (board.getPin(xi, yi - 1) == Board.XPLAYER)
+      { // enemy pin above
+         pinFound = true;
+         faX = BLOCKED_FIELD_VAL;
+      }
+      else if (board.getPin(xi, yi - 1) == Board.YPLAYER)
+      { // own pin above
+         pinFound = true;
+         faX = xi;
+         faY = yi - 1;
       }
       else
       {
-         int faX, faY = UNUSED;
-         // blocking bridges
-         if (board.isBridged(xi - 1, yi, 3) || board.isBridged(xi + 1, yi, 0))
-         {
-            faX = BLOCKED_FIELD_VAL;
-         }
-         else if (board.getPin(xi, yi - 1) == Board.XPLAYER)
-         { // enemy pin above
-            pinFound = true;
-            faX = BLOCKED_FIELD_VAL;
-         }
-         else if (board.getPin(xi, yi - 1) == Board.YPLAYER)
-         { // own pin above
-            pinFound = true;
-            faX = xi;
-            faY = yi - 1;
-         }
-         else
-         {
-            faX = data[xi][yi - 1].getFatherX();
-            faY = data[xi][yi - 1].getFatherY();
-         }
-         // check if own pin left or right above
-         if (board.getPin(xi - 1, yi - 2) == Board.YPLAYER
-               && board.bridgeAllowed(xi, yi, 1))
-         { // left
-            faX = xi - 1;
-            faY = yi - 2;
-         }
-         else if (board.getPin(xi + 1, yi - 2) == Board.YPLAYER
-               && board.bridgeAllowed(xi, yi, 2))
-         { // right
-            faX = xi + 1;
-            faY = yi - 2;
-         }
-         else if (board.getPin(xi - 2, yi - 1) == Board.YPLAYER
-               && board.bridgeAllowed(xi, yi, 0))
-         { // right
-            faX = xi - 2;
-            faY = yi - 1;
-         }
-         else if (board.getPin(xi + 2, yi - 1) == Board.YPLAYER
-               && board.bridgeAllowed(xi, yi, 3))
-         { // right
-            faX = xi + 2;
-            faY = yi - 1;
-         }
-         data[xi][yi].setFather(faX, faY);
+         // TODO: clarify what is the intention?
+         faX = data[xi][yi - 1].getFatherX();
+         faY = data[xi][yi - 1].getFatherY();
       }
+
+      // check if own pin left or right above
+      if (board.getPin(xi - 1, yi - 2) == Board.YPLAYER
+            && board.bridgeAllowed(xi, yi, 1))
+      { // left 1
+         faX = xi - 1;
+         faY = yi - 2;
+      }
+      else if (board.getPin(xi + 1, yi - 2) == Board.YPLAYER
+            && board.bridgeAllowed(xi, yi, 2))
+      { // right 1
+         faX = xi + 1;
+         faY = yi - 2;
+      }
+      else if (board.getPin(xi - 2, yi - 1) == Board.YPLAYER
+            && board.bridgeAllowed(xi, yi, 0))
+      { // left 2
+         faX = xi - 2;
+         faY = yi - 1;
+      }
+      else if (board.getPin(xi + 2, yi - 1) == Board.YPLAYER
+            && board.bridgeAllowed(xi, yi, 3))
+      { // right 2
+         faX = xi + 2;
+         faY = yi - 1;
+      }
+      data[xi][yi].setFather(faX, faY);
+
       return pinFound; // TODO ist das optimal?
    }
 
