@@ -264,16 +264,16 @@ public final class Races
     * Method looks to south.
     * @return false if blocking pin was found
     */
-   private boolean blockingButtom()
+   private boolean blockingBottom()
    {
       // everything okay if my turn or nothing is blocking
       return nextPlayer == Board.YPLAYER
-            || checkButtomPin(pinX, pinY + 1)
-            && checkButtomPin(pinX, pinY + 2)
-            && checkButtomPin(pinX + 1, pinY + 1)
-            && checkButtomPin(pinX - 1, pinY + 1)
-            && checkButtomPinTwo(pinX, pinY + 3)
-            && checkButtomPinTwo(pinX, pinY + 4);
+            || checkBottomPin(pinX, pinY + 1)
+            && checkBottomPin(pinX, pinY + 2)
+            && checkBottomPin(pinX + 1, pinY + 1)
+            && checkBottomPin(pinX - 1, pinY + 1)
+            && checkBottomPinTwo(pinX, pinY + 3)
+            && checkBottomPinTwo(pinX, pinY + 4);
    }
 
    /**
@@ -300,7 +300,7 @@ public final class Races
     * @param oppY y of pin to check
     * @return true if pin is not blocking
     */
-   private boolean checkButtomPin(final int oppX, final int oppY)
+   private boolean checkBottomPin(final int oppX, final int oppY)
    {
       return !(board.getPin(oppX, oppY) == Board.XPLAYER
             && (board.isBridged(oppX, oppY, 0)
@@ -338,7 +338,7 @@ public final class Races
     * @param oppY y of pin to check
     * @return true if pin is not blocking
     */
-   private boolean checkButtomPinTwo(final int oppX, final int oppY)
+   private boolean checkBottomPinTwo(final int oppX, final int oppY)
    {
       return oppY >= board.getYsize()
             || !(board.getPin(oppX, oppY) == Board.XPLAYER
@@ -369,8 +369,8 @@ public final class Races
     * @param nextPlayerIn who's next?
     * @return true, if allowed
     */
-   public boolean checkButtom(final int fx, final int fy, final Board boardIn,
-         final int nextPlayerIn)
+   public boolean checkBottom(final int fx, final int fy, final Board boardIn,
+                              final int nextPlayerIn)
    {
       pinX = fx;
       pinY = fy;
@@ -378,7 +378,7 @@ public final class Races
       nextPlayer = nextPlayerIn;
 
       //check for direct block or blocking races
-      return blockingButtom() && checkFor5() && checkFor6() && checkFor4() && checkFor7();
+      return blockingBottom() && checkFor5() && checkFor6() && checkFor4() && checkFor7();
    }
 
    /**

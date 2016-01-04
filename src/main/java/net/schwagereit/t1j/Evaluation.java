@@ -939,7 +939,7 @@ public final class Evaluation implements Board.BoardListener
                //never accept pin which are too far to the side if
                //   next pin is set by opponent
                if (checkPlausiBottom(xi, checkX, checkY, nextPlayer)
-                     && Races.getRaces().checkButtom(checkX, checkY, board, nextPlayer))
+                     && Races.getRaces().checkBottom(checkX, checkY, board, nextPlayer))
                {
                   if (computeCritical)
                   {

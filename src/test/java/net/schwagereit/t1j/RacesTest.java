@@ -25,8 +25,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(21, 19, Board.XPLAYER));
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck4_2()
@@ -37,8 +37,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(11, 19, Board.XPLAYER));
       assertTrue(bo.setPin(10, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(11, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(11, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(11, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(11, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck4_3()
@@ -49,8 +49,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       assertTrue(bo.setPin(19, 15, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
    
    public void testCheck5_1()
@@ -61,8 +61,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(17, 21, Board.XPLAYER));
       assertTrue(bo.setPin(19, 22, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 21, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(18, 21, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 21, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(18, 21, bo, Board.YPLAYER));
    }
 
    public void testCheck5_2()
@@ -73,8 +73,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(17, 11, Board.XPLAYER));
       assertTrue(bo.setPin(19, 12, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.YPLAYER));
    }
 
    public void testCheck5_3()
@@ -88,8 +88,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       assertTrue(bo.setPin(19, 15, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(20, 12, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(20, 12, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(20, 12, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(20, 12, bo, Board.YPLAYER));
    }
 
    public void testCheck6_1()
@@ -100,8 +100,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(19, 21, Board.XPLAYER));
       assertTrue(bo.setPin(17, 22, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 21, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(18, 21, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 21, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(18, 21, bo, Board.YPLAYER));
    }
    
    public void testCheck6_2()
@@ -112,8 +112,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(19, 11, Board.XPLAYER));
       assertTrue(bo.setPin(17, 12, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.YPLAYER));
    }
    public void testCheck7_1()
    {
@@ -123,8 +123,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(21, 19, Board.XPLAYER));
       assertTrue(bo.setPin(22, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck7_2()
@@ -135,12 +135,12 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(4, 9, Board.XPLAYER));
       assertTrue(bo.setPin(5, 7, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(4, 8, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(4, 8, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(4, 8, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(4, 8, bo, Board.YPLAYER));
    }
 
 
-   public void testBlockedButtom()
+   public void testBlockedBottom()
    {
       bo.clearBoard();
 
@@ -148,7 +148,7 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(10, 14, Board.XPLAYER));
       assertTrue(bo.setPin( 8, 13, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(10, 12, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(10, 12, bo, Board.XPLAYER));
       
       //other board
       bo.clearBoard();
@@ -157,7 +157,7 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(10, 14, Board.XPLAYER));
       assertTrue(bo.setPin( 8, 13, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(10, 12, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(10, 12, bo, Board.XPLAYER));
 
    }
    
@@ -169,8 +169,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(21, 19, Board.XPLAYER));
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck3_2()
@@ -181,8 +181,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(11, 19, Board.XPLAYER));
       assertTrue(bo.setPin(10, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(11, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(11, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(11, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(11, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck3_3()
@@ -193,8 +193,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       assertTrue(bo.setPin(19, 15, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
    
    public void testCheck2_1()
@@ -205,8 +205,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(17, 21, Board.XPLAYER));
       assertTrue(bo.setPin(19, 22, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 21, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(18, 21, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 21, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(18, 21, bo, Board.YPLAYER));
    }
 
    public void testCheck2_2()
@@ -217,8 +217,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(17, 11, Board.XPLAYER));
       assertTrue(bo.setPin(19, 12, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.YPLAYER));
    }
 
    public void testCheck2_3()
@@ -232,8 +232,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(20, 17, Board.XPLAYER));
       assertTrue(bo.setPin(19, 15, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(20, 12, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(20, 12, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(20, 12, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(20, 12, bo, Board.YPLAYER));
    }
 
    public void testCheck1_1()
@@ -244,8 +244,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(19, 21, Board.XPLAYER));
       assertTrue(bo.setPin(17, 22, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 21, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(18, 21, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 21, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(18, 21, bo, Board.YPLAYER));
    }
    
    public void testCheck1_2()
@@ -256,8 +256,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(19, 11, Board.XPLAYER));
       assertTrue(bo.setPin(17, 12, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(18, 11, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(18, 11, bo, Board.YPLAYER));
    }
    public void testCheck0_1()
    {
@@ -267,8 +267,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(21, 19, Board.XPLAYER));
       assertTrue(bo.setPin(22, 17, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(21, 18, bo, Board.XPLAYER));
-      assertTrue(Races.getRaces().checkButtom(21, 18, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(21, 18, bo, Board.XPLAYER));
+      assertTrue(Races.getRaces().checkBottom(21, 18, bo, Board.YPLAYER));
    }
 
    public void testCheck0_2()
@@ -279,8 +279,8 @@ public class RacesTest extends TestCase
       assertTrue(bo.setPin(4, 9, Board.XPLAYER));
       assertTrue(bo.setPin(5, 7, Board.XPLAYER));
       
-      assertFalse(Races.getRaces().checkButtom(4, 8, bo, Board.XPLAYER));
-      assertFalse(Races.getRaces().checkButtom(4, 8, bo, Board.YPLAYER));
+      assertFalse(Races.getRaces().checkBottom(4, 8, bo, Board.XPLAYER));
+      assertFalse(Races.getRaces().checkBottom(4, 8, bo, Board.YPLAYER));
    }
 
 
