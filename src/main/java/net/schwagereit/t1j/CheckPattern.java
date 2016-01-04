@@ -239,9 +239,9 @@ public final class CheckPattern
          {
             PatternElement element = (PatternElement) iterator.next();
             hx = critPos.getX() + element.x1;
-            hy = critPos.getY() + element.y1 * (critPos.isDir() ? 1 : -1);
+            hy = critPos.getY() + element.y1 * (critPos.isDirectionDown() ? 1 : -1);
             ix = critPos.getX() + element.x2;
-            iy = critPos.getY() + element.y2 * (critPos.isDir() ? 1 : -1);
+            iy = critPos.getY() + element.y2 * (critPos.isDirectionDown() ? 1 : -1);
 
             if (hx < 0 || hy < 0 || hy > board.getYsize() || hx > board.getXsize())
             {

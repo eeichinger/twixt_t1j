@@ -33,7 +33,7 @@ public final class Evaluation implements Board.BoardListener
       private final int y;
 
       /* Direction. */
-      private final boolean dir;
+      private final boolean directionDown;
 
       /**
        * Cons'tor.
@@ -42,23 +42,23 @@ public final class Evaluation implements Board.BoardListener
        *           x
        * @param yin
        *           y
-       * @param dirin
+       * @param directionDown
        *           direction (UP or DOWN)
        */
-      public CritPos(final int xin, final int yin, final boolean dirin)
+      public CritPos(final int xin, final int yin, final boolean directionDown)
       {
          x = xin;
          y = yin;
-         dir = dirin;
+         this.directionDown = directionDown;
       }
 
       /**
        * Return the Direction. Down/Right is true.
        * @return Returns the dir.
        */
-      public boolean isDir()
+      public boolean isDirectionDown()
       {
-         return dir;
+         return directionDown;
       }
 
       /**
@@ -81,7 +81,7 @@ public final class Evaluation implements Board.BoardListener
 
       public String toString()
       {
-         return new Move(x ,y) + "-" + dir;
+         return BoardLabels.holeName(x, y, false) + "-" + directionDown;
       }
 
       @Override
@@ -89,14 +89,14 @@ public final class Evaluation implements Board.BoardListener
          if (this == o) return true;
          if (o == null || getClass() != o.getClass()) return false;
 
-         CritPos critPos = (CritPos) o;
+         CritPos other = (CritPos) o;
 
-         return (x == critPos.x) && (y == critPos.y) && (dir == critPos.dir);
+         return (x == other.x) && (y == other.y) && (directionDown == other.directionDown);
       }
 
       @Override
       public int hashCode() {
-         int idir = (dir ? 1 : 0);
+         int idir = (directionDown ? 1 : 0);
          int result = ((x << 5) + y) << idir;
          return result;
       }

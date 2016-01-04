@@ -102,7 +102,7 @@ final class MoveGenerator
 
          int xe = element.getX();
          int ye = element.getY();
-         if (!element.isDir())
+         if (!element.isDirectionDown())
          {
             // put pin (player is always yPlayer on own board)
             if (ownBoard.bridgeAllowed(xe, ye, 1)
@@ -168,7 +168,7 @@ final class MoveGenerator
 
          int ye = element.getX(); // CAUTION: swapped
          int xe = element.getY();
-         xe += (element.isDir() ? 4 : -4);
+         xe += (element.isDirectionDown() ? 4 : -4);
          ye += ((ye > match.getYsize() / 2 + 3) ? -1 :
                (ye < match.getYsize() / 2 - 3) ? 1 : 0);
          // put pin (player is always yPlayer)
