@@ -22,6 +22,8 @@ import lombok.NonNull;
  */
 public final class FindMove
 {
+   public static final boolean DEBUG = false;
+
    private static final int INITIAL_CAPACITY = 10000;
    private static final int WAIT_MILLIS = 20;
    private static final int MILLI_PER_SEC = 1000;
@@ -367,12 +369,12 @@ public final class FindMove
       {
          cacheHitCount++;
          //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-//         return cachedScore;
+         if (!DEBUG) return cachedScore;
       }
       int calculatedScore = evaluatePosition(player);
       evaluatedBoardPositionCache.put(cacheKey, calculatedScore);
 
-      if (cachedScore != null && cachedScore != calculatedScore) {
+      if (DEBUG && cachedScore != null && cachedScore != calculatedScore) {
          // TODO: figure out why re-evaluating the board sometimes results in different scores?!?
          System.err.println("cached/calculated score differ for same board position!");
 //         throw new IllegalStateException("cached/calculated score differ for same board position!");
