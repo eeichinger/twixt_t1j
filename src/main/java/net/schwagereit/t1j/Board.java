@@ -23,11 +23,15 @@ public final class Board
 
    final static private class Node
    {
-      private int value; //0 or XPLAYER or YPLAYER
+      private int player; //0 or XPLAYER or YPLAYER
 
       private final int[] bridge = new int[4];
 
       public Node() {
+      }
+
+      public Node(Node other) {
+         this.copyFrom(other);
       }
 
       /**
@@ -35,7 +39,7 @@ public final class Board
        */
       void clear()
       {
-         value = 0;
+         player = 0;
          bridge[0] = 0;
          bridge[1] = 0;
          bridge[2] = 0;
@@ -56,7 +60,7 @@ public final class Board
        */
       public void copyFrom(Node source)
       {
-         value = source.value;
+         player = source.player;
          bridge[0] = source.bridge[0];
          bridge[1] = source.bridge[1];
          bridge[2] = source.bridge[2];
@@ -409,37 +413,37 @@ public final class Board
       int x = xin + MARGIN; //the input data is corrected to reflect the margin
       int y = yin + MARGIN;
       //checks are done, so lets move on
-      field[x][y].value = player;
+      field[x][y].player = player;
       //checks for bridges if the other pin has the same color
-      if (field[x - 2][y - 1].value == player)
+      if (field[x - 2][y - 1].player == player)
       {
          setBridge(x, y, 0);
       }
-      if (field[x - 1][y - 2].value == player)
+      if (field[x - 1][y - 2].player == player)
       {
          setBridge(x, y, 1);
       }
-      if (field[x + 1][y - 2].value == player)
+      if (field[x + 1][y - 2].player == player)
       {
          setBridge(x, y, 2);
       }
-      if (field[x + 2][y - 1].value == player)
+      if (field[x + 2][y - 1].player == player)
       {
          setBridge(x, y, 3);
       }
-      if (field[x + 2][y + 1].value == player)
+      if (field[x + 2][y + 1].player == player)
       {
          setBridge(x + 2, y + 1, 0);
       }
-      if (field[x + 1][y + 2].value == player)
+      if (field[x + 1][y + 2].player == player)
       {
          setBridge(x + 1, y + 2, 1);
       }
-      if (field[x - 1][y + 2].value == player)
+      if (field[x - 1][y + 2].player == player)
       {
          setBridge(x - 1, y + 2, 2);
       }
-      if (field[x - 2][y + 1].value == player)
+      if (field[x - 2][y + 1].player == player)
       {
          setBridge(x - 2, y + 1, 3);
       }
@@ -464,7 +468,7 @@ public final class Board
    {
       int x = xin + MARGIN; //the input data is corrected to reflect the margin
       int y = yin + MARGIN;
-      if (field[x][y].value == 0) //empty field?
+      if (field[x][y].player == 0) //empty field?
       {
          return false;
       }
@@ -475,7 +479,7 @@ public final class Board
       }
 
       //checks are done, so lets move on
-      field[x][y].value = 0;
+      field[x][y].player = 0;
       //checks for bridges if the other pin has the same color
       removeBridge(x, y, 0);
       removeBridge(x, y, 1);
@@ -507,7 +511,7 @@ public final class Board
    {
       return !((player == XPLAYER && (yin < 1 || yin > ysize - 2 || xin < 0 || xin > xsize - 1))
             || (player == YPLAYER && (yin < 0 || yin > ysize - 1 || xin < 1 || xin > xsize - 2))
-            || (field[xin + 3][yin + 3].value != 0));
+            || (field[xin + 3][yin + 3].player != 0));
       // simplified from
 //      return (player == XPLAYER && (yin < 1 || yin > ysize - 2 || xin < 0 || xin > xsize - 1))
 //            || (player == YPLAYER && (yin < 0 || yin > ysize - 1 || xin < 1 || xin > xsize - 2))
@@ -587,7 +591,7 @@ public final class Board
    public int getPin(final int x, final int y)
    {
       //the input data is corrected to reflect the margin
-      return field[x + MARGIN][y + MARGIN].value;
+      return field[x + MARGIN][y + MARGIN].player;
    }
 
    /**
