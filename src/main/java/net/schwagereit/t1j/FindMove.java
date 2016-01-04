@@ -36,6 +36,8 @@ public final class FindMove
 
    // replace with specialized int2int map: http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/
    private final Map<Integer,Integer> evaluatedBoardPositionCache = new HashMap<>(INITIAL_CAPACITY);
+   private int cacheAccessCount = 0;
+   private int cacheHitCount = 0;
 
    private Stopwatch clock;
    /** use alphabeta for highest ply. */
@@ -125,6 +127,8 @@ public final class FindMove
       ComputeMoveContext computeMoveContext = new ComputeMoveContext();
       usealphabeta = false;
       evaluatedBoardPositionCache.clear();
+      cacheAccessCount = 0;
+      cacheHitCount = 0;
       for (int currentMaxPly = 3; currentMaxPly <= maxPly; currentMaxPly++)
       {
          if (currentMaxPly == 4 && currentMaxPly != maxPly) continue;
@@ -351,21 +355,28 @@ public final class FindMove
    }
 
    private int positionValue(int player) {
-      int val;
-      Integer positionVal = evaluatedBoardPositionCache.get(match.getBoardY().getZobristValue());
-      if (positionVal != null)
+      // TODO: sadly despite a 70% cache hit ratio, we only get a performance improvement of ~10%
+      cacheAccessCount++;
+      if (cacheAccessCount % 10000 == 0) {
+         System.out.println(String.format("analysed positions cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
+      }
+      final Integer cacheKey = match.getBoardY().getZobristValue();
+      Integer cachedScore = evaluatedBoardPositionCache.get(cacheKey);
+      if (cachedScore != null)
       {
+         cacheHitCount++;
          //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
-         return positionVal;
+//         return cachedScore;
       }
-      val = evaluatePosition(player);
-      evaluatedBoardPositionCache.put(match.getBoardY().getZobristValue(), val);
+      int calculatedScore = evaluatePosition(player);
+      evaluatedBoardPositionCache.put(cacheKey, calculatedScore);
 
-      final int analysedPositions = evaluatedBoardPositionCache.size();
-      if (analysedPositions % 1000 == 0) {
-//         System.out.println("analysed positions " + analysedPositions);
+      if (cachedScore != null && cachedScore != calculatedScore) {
+         // will throw - means cacheKey needs rework
+         System.err.println("cached/calculated score differ for same board position!");
+//         throw new IllegalStateException("cached/calculated score differ for same board position!");
       }
-      return val;
+      return calculatedScore;
    }
 
 }
