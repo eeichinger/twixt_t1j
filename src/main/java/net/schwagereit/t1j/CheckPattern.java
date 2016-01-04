@@ -55,24 +55,25 @@ public final class CheckPattern
     */
    private static final class PatternElement
    {
-      final static Map checks = new HashMap();
-      int condition;
-      int x1, x2, y1, y2;
+      final static Map<String,Integer> checks = new HashMap<>();
 
       /**
        * Fill the HashMap with all known conditions.
        */
       static void fillChecks()
       {
-         checks.put(FREE_STR, new Integer(FREE_NR));
-         checks.put(OWN_STR, new Integer(OWN_NR));
-         checks.put(OPP_STR, new Integer(OPP_NR));
-         checks.put(SET_STR, new Integer(SET_NR));
-         checks.put(BPOSS_STR, new Integer(BPOSS_NR));
-         checks.put(BEXIST_STR, new Integer(BEXIST_NR));
-         checks.put(STRONG_STR, new Integer(STRONG_NR));
-         checks.put(NSTRONG_STR, new Integer(NSTRONG_NR));
+         checks.put(FREE_STR, FREE_NR);
+         checks.put(OWN_STR, OWN_NR);
+         checks.put(OPP_STR, OPP_NR);
+         checks.put(SET_STR, SET_NR);
+         checks.put(BPOSS_STR, BPOSS_NR);
+         checks.put(BEXIST_STR, BEXIST_NR);
+         checks.put(STRONG_STR, STRONG_NR);
+         checks.put(NSTRONG_STR, NSTRONG_NR);
       }
+
+      int condition;
+      int x1, x2, y1, y2;
 
       /**
        * Cons'tor.
@@ -84,7 +85,7 @@ public final class CheckPattern
 
          if (checks.containsKey(tok[0]))
          {
-            int checkNr = ((Integer) checks.get(tok[0])).intValue();
+            int checkNr = checks.get(tok[0]);
             int argNr = (checkNr == BPOSS_NR || checkNr == BEXIST_NR) ? 4 : 2;
 
             condition = checkNr;
@@ -157,10 +158,12 @@ public final class CheckPattern
     */
    private static final class Pattern
    {
+      final static String ln = System.getProperty("line.separator");
+
       /** Name. */
       final String name;
       /** List of PatternElement. */
-      final List elements;
+      final List<PatternElement> elements;
       /** Is pattern symmetric, i.e. it is not mirrored */
       final boolean symmetric;
 
@@ -172,7 +175,7 @@ public final class CheckPattern
       Pattern(String text, boolean sym)
       {
          name = text;
-         elements = new LinkedList();
+         elements = new LinkedList<>();
          symmetric = sym;
       }
 
@@ -184,10 +187,10 @@ public final class CheckPattern
       {
          name = source.name + " mirrored";
          symmetric = source.symmetric;
-         elements = new LinkedList();
-         for (Iterator iterator = source.elements.iterator(); iterator.hasNext();)
+         elements = new LinkedList<>();
+         for (Iterator<PatternElement> iterator = source.elements.iterator(); iterator.hasNext();)
          {
-            PatternElement patternElement = (PatternElement) iterator.next();
+            PatternElement patternElement = iterator.next();
             // Elements are mirrored in cons'tor
             this.elements.add(new PatternElement(patternElement));
          }
@@ -208,7 +211,6 @@ public final class CheckPattern
        */
       public String toString()
       {
-         String ln = System.getProperty("line.separator");
          StringBuffer ret = new StringBuffer().append(name).append(":");
          for (Iterator iterator = elements.iterator(); iterator.hasNext();)
          {
@@ -359,10 +361,6 @@ public final class CheckPattern
       {
          System.out.println("IO-Error reading file '" + FILENAME + "'.");
       }
-      do
-      {
-
-      } while (false);
       return null;
    }
 
@@ -422,10 +420,10 @@ public final class CheckPattern
          reader.close();
 
          //mirror non-symmetric patterns
-         List mirr = new LinkedList();
-         for (Iterator iterator = offensivePatterns.iterator(); iterator.hasNext();)
+         List<Pattern> mirr = new LinkedList<>();
+         for (Iterator<Pattern> iterator = offensivePatterns.iterator(); iterator.hasNext();)
          {
-            Pattern pattern = (Pattern) iterator.next();
+            Pattern pattern = iterator.next();
             if (!pattern.symmetric)
             {
                mirr.add(new Pattern(pattern));
@@ -433,10 +431,10 @@ public final class CheckPattern
          }
          offensivePatterns.addAll(mirr);
 
-         mirr = new LinkedList();
-         for (Iterator iterator = defensivePatterns.iterator(); iterator.hasNext();)
+         mirr.clear();
+         for (Iterator<Pattern> iterator = defensivePatterns.iterator(); iterator.hasNext();)
          {
-            Pattern pattern = (Pattern) iterator.next();
+            Pattern pattern = iterator.next();
             if (!pattern.symmetric)
             {
                mirr.add(new Pattern(pattern));
@@ -452,7 +450,6 @@ public final class CheckPattern
       {
          System.out.println("IO-Error reading file '" + FILENAME + "'.");
       }
-
    }
 
    /**
@@ -465,7 +462,7 @@ public final class CheckPattern
     */
    public Set<Move> findPatternMoves(final boolean offense, final Board board, final Evaluation.CritPos critPos, final int player)
    {
-      HashSet<Move> moves = new HashSet<Move>();
+      HashSet<Move> moves = new HashSet<>();
 
       final List<Pattern> patterns = offense ? offensivePatterns : defensivePatterns;
       for (Iterator<Pattern> iterator = patterns.iterator(); iterator.hasNext();)
