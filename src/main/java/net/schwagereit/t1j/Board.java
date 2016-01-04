@@ -200,6 +200,7 @@ public final class Board
          }
       zobristEnabled = false;
       zobristValue = 0;
+      setSize(24, 24);
    }
 
    public void setBoardListener(BoardListener listener) {
