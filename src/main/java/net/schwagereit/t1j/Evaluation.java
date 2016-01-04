@@ -614,7 +614,7 @@ public final class Evaluation
       for (int yi = yin; yi < board.getYsize(); yi++)
       {
          // break if other pin found (regardless of color)
-         if (yi > yin + 1 && calculateDistForY(xin, yi))
+         if (calculateDistForY(xin, yi) && yi > yin + 1)
          {
             break;
          }
@@ -625,7 +625,7 @@ public final class Evaluation
          for (int yi = yin - 1; yi < board.getYsize(); yi++)
          {
             // break if other pin found (regardless of color)
-            if (yi > yin + 2 && calculateDistForY(xin - 1, yi))
+            if (calculateDistForY(xin - 1, yi) && yi > yin + 2)
             {
                break;
             }
@@ -640,7 +640,7 @@ public final class Evaluation
          for (int yi = yin - 1; yi < board.getYsize(); yi++)
          {
             // break if other pin found (regardless of color)
-            if (yi > yin + 2 && calculateDistForY(xin + 1, yi))
+            if (calculateDistForY(xin + 1, yi) && yi > yin + 2)
             {
                break;
             }
@@ -678,7 +678,7 @@ public final class Evaluation
       for (int yi = yin - 1; yi < board.getYsize(); yi++)
       {
          // break if other pin found (regardless of color)
-         if (yi > yin + 2 && calculateDistForY(xin, yi))
+         if (calculateDistForY(xin, yi) && yi > yin + 2)
          {
             break;
          }
