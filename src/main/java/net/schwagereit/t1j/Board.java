@@ -155,7 +155,7 @@ public final class Board
    /**
     * Cons'tor - no external instance.
     */
-   private Board()
+   Board()
    { //some initialization
       int i, j;
       for (i = 0; i < field.length; i++)
@@ -468,14 +468,15 @@ public final class Board
    {
       int x = xin + MARGIN; //the input data is corrected to reflect the margin
       int y = yin + MARGIN;
-      if (field[x][y].player == 0) //empty field?
+      final int fieldPlayer = field[x][y].player;
+      if (fieldPlayer != player) //empty field or opponent pin?
       {
          return false;
       }
 
       if (zobristEnabled)
       {
-         zobristValue ^= ZOBRIST.getPinValue(xin, yin, player);
+         zobristValue ^= ZOBRIST.getPinValue(xin, yin, fieldPlayer);
       }
 
       //checks are done, so lets move on
