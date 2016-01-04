@@ -1,6 +1,12 @@
 package net.schwagereit.t1j;
 
+import net.schwagereit.t1j.Evaluation.CritPos;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,33 +17,37 @@ import static org.junit.Assert.assertTrue;
  */
 public class EvaluationTest
 {
-   @Test
-   public void evals_empty() {
-      Board board = new Board();
-      Evaluation eval = new Evaluation(board);
+   Board board;
 
-      int scoreY = eval.evaluateY(Board.YPLAYER);
-      assertEquals(990, scoreY);
-      int scoreX = eval.evaluateY(Board.XPLAYER);
-      assertEquals(990, scoreX);
+   @Before
+   public void setup() {
+      /* Puzzle-01: D9, F6, F8, H7, E12, I9 */
+      board = new Board(13);
+      board.setPin(3, 8, Board.YPLAYER);
+      board.setPin(5, 5, Board.XPLAYER);
+      board.setPin(5, 7, Board.YPLAYER);
+      board.setPin(7, 6, Board.XPLAYER);
+      board.setPin(4, 11, Board.YPLAYER);
+      board.setPin(8, 8, Board.XPLAYER);
    }
 
    @Test
-   public void setup_correctly() {
-      Board board = new Board();
+   public void evals_empty() {
       Evaluation eval = new Evaluation(board);
 
-      board.setPin(2, 1, Board.YPLAYER);
-      board.setPin(17, 2, Board.YPLAYER);
-      board.setPin(12, 2, Board.XPLAYER);
+      int scoreY = eval.evaluateY(Board.YPLAYER);
+      assertEquals(111, scoreY);
+   }
 
-      int score1 = eval.evaluateY(Board.YPLAYER);
+   @Test
+   public void criticalPositions() {
+      Evaluation eval = new Evaluation(board);
 
-      // clear boardlistener
-      board.setBoardListener(null);
-      Evaluation eval2 = new Evaluation(board);
-      int score2 = eval2.evaluateY(Board.YPLAYER);
-
-      assertEquals(score1, score2);
+      Set<CritPos> critPos = eval.computeCriticalY();
+      assertEquals(critPos.size(), 4);
+      assertTrue(critPos.contains(new CritPos(4, 11, true)));
+      assertTrue(critPos.contains(new CritPos(4, 11, false)));
+      assertTrue(critPos.contains(new CritPos(3, 8, true)));
+      assertTrue(critPos.contains(new CritPos(5, 7, false)));
    }
 }

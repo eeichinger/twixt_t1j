@@ -188,10 +188,14 @@ public final class Board
    
    private BoardListener boardListener;
 
+   Board() {
+      this(24);
+   }
+
    /**
     * Cons'tor - no external instance.
     */
-   Board()
+   Board(int size)
    { //some initialization
       int i, j;
       for (i = 0; i < field.length; i++)
@@ -201,7 +205,7 @@ public final class Board
          }
       zobristEnabled = false;
       zobristValue = 0;
-      setSize(24, 24);
+      setSize(size, size);
    }
 
    public void setBoardListener(BoardListener listener) {
