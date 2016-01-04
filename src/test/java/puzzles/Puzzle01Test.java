@@ -10,7 +10,6 @@ import net.schwagereit.t1j.GeneralSettings;
 import net.schwagereit.t1j.LoadSave;
 import net.schwagereit.t1j.Match;
 import net.schwagereit.t1j.Move;
-import net.schwagereit.t1j.Zobrist;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -32,7 +31,7 @@ public class Puzzle01Test {
       LoadSave.loadGameData(match, reader);
 
       settings.setMdFixedPly(true);
-      settings.setMdPly(10);
+      settings.setMdPly(9);
 
       final FindMove findMove = new FindMove(match, settings);
 

@@ -64,13 +64,11 @@ final class MoveGenerator
     */
    private Set<Move> generateNewMoves(final int player)
    {
-      //currentPlayer = player;
-
       Set<Move> moves = new HashSet<Move>();
       Board ownBoard = match.getBoard(player);
-      Evaluation ownEval = ownBoard.getEval();
+      Evaluation ownEval = match.getEval(player);
       Board oppBoard = match.getBoard(-player);
-      Evaluation oppEval = oppBoard.getEval();
+      Evaluation oppEval = match.getEval(-player);
 
       // eval for opponent
       int oppVal = oppEval.evaluateY(true, Board.YPLAYER);

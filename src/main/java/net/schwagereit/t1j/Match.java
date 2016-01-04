@@ -24,10 +24,12 @@ import javax.swing.JOptionPane;
 public final class Match extends Observable implements Runnable
 {
    /** the real board. */
-   private final Board boardY; 
-   
+   private final Board boardY;
+   private final Evaluation evalY;
+
    /** the mirrored board. */
    private final Board boardX;
+   private final Evaluation evalX;
 
    /** the board which is displayed. */
    private final Board boardDisplay;
@@ -74,11 +76,12 @@ public final class Match extends Observable implements Runnable
    {
       boardY = Board.getBoard(Board.YPLAYER);
       boardY.setZobristEnabled(true);
+      evalY = new Evaluation(boardY);
       boardX = Board.getBoard(Board.XPLAYER);
+      boardX.setZobristEnabled(false);
+      evalX = new Evaluation(boardX);
       boardDisplay = Board.getBoardDisplay();
       matchData = null;
-      //evaluationY = new Evaluation(Board.YPLAYER);
-      //evaluationX = new Evaluation(Board.XPLAYER);
       findMove = new FindMove(this);
    }
 
@@ -120,10 +123,11 @@ public final class Match extends Observable implements Runnable
       setGuiBlocked(false);
 
       boardY.setSize(matchData.mdXsize, matchData.mdYsize);
-      
-      boardY.getEval().setupForY();
+      evalY.setupForY();
+
       boardX.setSize(matchData.mdYsize, matchData.mdXsize);
-      boardX.getEval().setupForY();
+      evalX.setupForY();
+
       resetMoveList();
 
       //two computer players?
@@ -413,12 +417,12 @@ public final class Match extends Observable implements Runnable
    {
       // check for finished match
       String matchOverMessage = "";
-      if (boardY.checkGameOver())
+      if ((evalY.evaluateY(false, Board.XPLAYER) == 0))
       {
          matchOverMessage = matchData.mdPlayerY + " "
          + Messages.getString("Match.topDown");
       }
-      else if (boardX.checkGameOver())
+      else if ((evalX.evaluateY(false, Board.XPLAYER) == 0))
       {
          matchOverMessage = matchData.mdPlayerX + " "
          + Messages.getString("Match.leftRight");
@@ -546,6 +550,10 @@ public final class Match extends Observable implements Runnable
       return boardY;
    }
 
+   public Evaluation getEvalY() {
+      return evalY;
+   }
+
    /**
     * Get mirrored Board.
     * @return Returns the board.
@@ -553,6 +561,11 @@ public final class Match extends Observable implements Runnable
    public Board getBoardX()
    {
       return boardX;
+   }
+
+   public Evaluation getEvalX()
+   {
+      return evalX;
    }
 
    /**
@@ -634,6 +647,16 @@ public final class Match extends Observable implements Runnable
    public Board getBoard(final int player)
    {
       return (player == Board.XPLAYER) ? boardX : boardY;
+   }
+
+   /**
+    * Get evaluation strategy for specified player.
+    * @param player x- or y-player
+    * @return Returns the evaluation strategy.
+    */
+   public Evaluation getEval(final int player)
+   {
+      return (player == Board.XPLAYER) ? evalX : evalY;
    }
 
    /**

@@ -16,6 +16,11 @@ package net.schwagereit.t1j;
  */
 public final class Board
 {
+   public interface BoardListener {
+      void addForY(int x, int y);
+      void removeForY(int x, int y, int player);
+   }
+
    final static private class Node
    {
       private int value; //0 or XPLAYER or YPLAYER
@@ -136,13 +141,12 @@ public final class Board
    /** Value of board for zobrist-hashing. */
    private int zobristValue;
 
-
    /** size of board. */
    private int xsize, ysize;
 
    private final Node[][] field = new Node[MAXBOARDSIZE][MAXBOARDSIZE];
    
-   private final Evaluation eval;
+   private BoardListener boardListener;
 
    /**
     * Cons'tor - no external instance.
@@ -155,9 +159,15 @@ public final class Board
          {
             field[i][j] = new Node();
          }
-      eval = new Evaluation(this);
       zobristEnabled = false;
       zobristValue = 0;
+   }
+
+   public void setBoardListener(BoardListener listener) {
+      if (listener != null && this.boardListener != null) {
+         throw new IllegalStateException("boardListener already set");
+      }
+      this.boardListener = listener;
    }
 
    /**
@@ -434,7 +444,9 @@ public final class Board
          setBridge(x - 2, y + 1, 3);
       }
 
-      eval.addForY(xin, yin);
+      if (boardListener != null) {
+         boardListener.addForY(xin, yin);
+      }
       return true; //set was okay
    }
 
@@ -474,8 +486,9 @@ public final class Board
       removeBridge(x - 1, y + 2, 2);
       removeBridge(x - 2, y + 1, 3);
 
-      eval.removeForY(xin, yin, player);
-
+      if (boardListener != null) {
+         boardListener.removeForY(xin, yin, player);
+      }
       return true; //remove was okay
    }
 
@@ -623,25 +636,6 @@ public final class Board
             || isBridged(hx, hy, 3) || isBridged(hx + 2, hy + 1, 0) ||
             isBridged(hx + 1, hy + 2, 1) || isBridged(hx - 1, hy + 2, 2) ||
             isBridged(hx - 2, hy + 1, 3);
-   }
-
-
-   /** 
-    * Get the Evaluation-object for this board.
-    * @return Returns the eval.
-    */
-   public Evaluation getEval()
-   {
-      return eval;
-   }
-
-   /**
-    * Check if game is over for the evaluation connected with this board.
-    * @return true, if game is over
-    */
-   public boolean checkGameOver()
-   {
-      return (eval.evaluateY(false, Board.XPLAYER) == 0);
    }
 
    /**

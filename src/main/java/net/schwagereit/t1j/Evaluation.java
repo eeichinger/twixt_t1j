@@ -18,7 +18,7 @@ import lombok.NonNull;
  *
  * @author Johannes Schwagereit (mail(at)johannes-schwagereit.de)
  */
-public final class Evaluation
+public final class Evaluation implements Board.BoardListener
 {
 
 
@@ -279,6 +279,7 @@ public final class Evaluation
    public Evaluation(final Board boardIn)
    {
       board = boardIn;
+      board.setBoardListener(this);
       
       // mirrored = (player == Board.XPLAYER);
 
