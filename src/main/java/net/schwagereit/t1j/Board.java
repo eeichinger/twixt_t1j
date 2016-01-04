@@ -16,12 +16,14 @@ package net.schwagereit.t1j;
  */
 public final class Board
 {
-
-   final private class Node
+   final static private class Node
    {
       private int value; //0 or XPLAYER or YPLAYER
 
       private final int[] bridge = new int[4];
+
+      public Node() {
+      }
 
       /**
        * Initialize a node.
@@ -33,6 +35,14 @@ public final class Board
          bridge[1] = 0;
          bridge[2] = 0;
          bridge[3] = 0;
+      }
+
+      public int hashCode() {
+         throw new UnsupportedOperationException("node is not meant to be used as a key");
+      }
+
+      public boolean equals(Object o) {
+         throw new UnsupportedOperationException("should never get here");
       }
 
       /**
@@ -652,6 +662,14 @@ public final class Board
       return zobristValue;
    }
 
+   @Override
+   public int hashCode() {
+      throw new UnsupportedOperationException();
+   }
+
+   public boolean equals(Object o) {
+      throw new UnsupportedOperationException();
+   }
 
    @SuppressWarnings("PointlessBooleanExpression")
    private static void rejectIf(boolean condition, String message) {
