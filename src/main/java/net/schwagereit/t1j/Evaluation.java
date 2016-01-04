@@ -261,13 +261,13 @@ public final class Evaluation implements Board.BoardListener
    private static final int BLOCKED_FIELD_VAL_MULT = BLOCKED_FIELD_VAL * MULT;
 
    /** set of all critical positions. */
-   private final Set<CritPos> critPoss = new HashSet<>();
+   private final Set<CritPos> criticalPositions = new HashSet<>();
 
    /** number of own pins in given row. */
-   private final int[] noPins = new int[Board.MAXDIM];
+   private final int[] numberOfPinsInRow = new int[Board.MAXDIM];
 
    /** positions of own pins in given rows. */
-   private final int[][] ownPin = new int[Board.MAXDIM][Board.MAXDIM]; // 36 is max.
+   private final int[][] positionsOfOwnPinsInRow = new int[Board.MAXDIM][Board.MAXDIM]; // 36 is max.
    
    /** Is this board mirrored?. */
    // private final boolean mirrored;
@@ -281,16 +281,16 @@ public final class Evaluation implements Board.BoardListener
       board = boardIn;
       board.setBoardListener(this);
       
-      // mirrored = (player == Board.XPLAYER);
-
       // create the objects for the data-array
-      for (int i = 0; i < data.length; i++)
+      for (int y = 0; y < data.length; y++)
       {
-         for (int j = 0; j < data[i].length; j++)
+         for (int x = 0; x < data[y].length; x++)
          {
-            data[i][j] = new FieldData();
+            data[y][x] = new FieldData();
          }
       }
+
+      reset();
    }
 
    /**
@@ -571,35 +571,36 @@ public final class Evaluation implements Board.BoardListener
    /**
     * setup the evaluation data from scratch for YPlayer.
     */
-   public void setupForY()
+   public void reset()
    {
       final int xmax = board.getXsize();
       final int ymax = board.getYsize();
       int xi, yi;
 
       // setup first row
-      noPins[0] = 0;
+      numberOfPinsInRow[0] = 0;
       for (xi = 0; xi < xmax; xi++)
       {
          calculateDistForY(xi, 0);
          if (board.getPin(xi, 0) == Board.YPLAYER)
          {
-            ownPin[0][noPins[0]] = xi;
-            noPins[0]++;
+            // TODO: what's ownPin[0][noPins[0]] supposed to mean?
+            positionsOfOwnPinsInRow[0][numberOfPinsInRow[0]] = xi;
+            numberOfPinsInRow[0]++;
          }
       }
 
       for (yi = 1; yi < ymax; yi++)
       {
-         noPins[yi] = 0;
+         numberOfPinsInRow[yi] = 0;
          for (xi = 0; xi < xmax; xi++)
          {
             calculateDistForY(xi, yi);
             // addElement own pin to list of own pins
             if (board.getPin(xi, yi) == Board.YPLAYER)
             {
-               ownPin[yi][noPins[yi]] = xi;
-               noPins[yi]++;
+               positionsOfOwnPinsInRow[yi][numberOfPinsInRow[yi]] = xi;
+               numberOfPinsInRow[yi]++;
             }
          }
       }
@@ -694,20 +695,21 @@ public final class Evaluation implements Board.BoardListener
     * Add a pin in Evaluation for Y-Player. This pin can either be an own one or
     * enemy-pin.
     * 
-    * @param xin
+    * @param x
     *           x
-    * @param yin
+    * @param y
     *           y
+    * @param player
+    *           player who adds pin
     */
-   public void addForY(final int xin, final int yin)
+   public void addForY(final int x, final int y, final int player)
    {
-      final int player = board.getPin(xin, yin);
-      updateRows(xin, yin, player);
+      updateRows(x, y, player);
       // addElement own pin to list of own pins
       if (player == Board.YPLAYER)
       {
-         ownPin[yin][noPins[yin]] = xin;
-         noPins[yin]++;
+         positionsOfOwnPinsInRow[y][numberOfPinsInRow[y]] = x;
+         numberOfPinsInRow[y]++;
       }
    } // addForY
 
@@ -715,20 +717,20 @@ public final class Evaluation implements Board.BoardListener
     * Remove a pin in Evaluation for Y-Player. This pin can either be an own one
     * or enemy-pin.
     * 
-    * @param xin
+    * @param x
     *           x
-    * @param yin
+    * @param y
     *           y
     * @param player
     *           player who removes pin
     */
-   public void removeForY(final int xin, final int yin, final int player)
+   public void removeForY(final int x, final int y, final int player)
    {
-      updateRows(xin, yin, player);
+      updateRows(x, y, player);
       // remove own pin from list of own pins
       if (player == Board.YPLAYER)
       {
-         noPins[yin]--;
+         numberOfPinsInRow[y]--;
       }
 
    } // removeForY
@@ -742,7 +744,7 @@ public final class Evaluation implements Board.BoardListener
     *           y-coord
     * @return value
     */
-   private int getDistVal(final int x, final int y)
+   private int computeDistanceToNextPin(final int x, final int y)
    {
       int dv = BLOCKED_FIELD_VAL_MULT;
       
@@ -774,94 +776,99 @@ public final class Evaluation implements Board.BoardListener
 
    /**
     * Compute value of situation. EvaluateY has to be called before.
-    * @param computeCritical Compute critical pin as well?
     * @param nextPlayer Who's turn is next?
-    * @return value of situation. The smaller the better. '0' for game-over.
+    * @return score of position. The smaller the better. '0' for game-over.
     */
-   public int evaluateY(boolean computeCritical, int nextPlayer) {
-      evaluateY(nextPlayer);
-      final int val = valueOfY(computeCritical, nextPlayer);
-      return val;
+   public int evaluateY(int nextPlayer) {
+      recomputePinValues(nextPlayer);
+      final int score = computeScore(false, nextPlayer);
+      return score;
+   }
+
+   /**
+    * Compute critical positions
+    * @return the list of critical positions or <c>null</c> if game over
+    */
+   public Set<CritPos> computeCriticalY() {
+      recomputePinValues(Board.YPLAYER);
+      final int score = computeScore(true, Board.YPLAYER);
+      // TODO: figure out if we can return empty set here instead of null to indicate game over
+      if (score == 0) {
+         return null;
+      }
+      return criticalPositions;
    }
 
    /**
     * Assign values to all own pins.
     * @param nextPlayer who is playing next
     */
-   private void evaluateY(int nextPlayer)
+   private void recomputePinValues(int nextPlayer)
    {
       final int ymax = board.getYsize();
-      int i, n, yi, pval, zval, col;
+      int pval, zval;
       int relevantXpos, relevantYpos;
       // reset the values of all own pins
-      for (yi = 1; yi < ymax; yi++) // each row
-      {
-         for (i = 0, n = noPins[yi]; i < n; i++)
-         {
-            data[ownPin[yi][i]][yi].setValue(BLOCKED_FIELD_VAL_MULT);
-            data[ownPin[yi][i]][yi].setRel(NO_FATHER, NO_FATHER);
-            // fatherX[ownPin[yi][i]][yi] = NO_FATHER;
-         }
-      }
+      resetPinValues();
       // calculate the values
-      for (yi = 0; yi < ymax; yi++) // each row
+      for (int y = 0; y < ymax; y++) // each row
       {
-         for (i = 0, n = noPins[yi]; i < n; i++) // each own pin in the row
+         for (int ix = 0, n = numberOfPinsInRow[y]; ix < n; ix++) // each own pin in the row
          {
-            col = ownPin[yi][i];
+            int ownPinX = positionsOfOwnPinsInRow[y][ix];
             
-            pval = getDistVal(col, yi);
-            relevantXpos = data[col][yi].getFatherX();
-            relevantYpos = data[col][yi].getFatherY();
+            pval = computeDistanceToNextPin(ownPinX, y);
+            relevantXpos = data[ownPinX][y].getFatherX();
+            relevantYpos = data[ownPinX][y].getFatherY();
             //System.out.print("<pval: " + pval + "> " + relevantXpos);
             
             // if pin is block by opponent's pins, lets look to the side 
             if (relevantXpos == BLOCKED_FIELD_VAL)
             {
                // lets look to the left
-               zval = getDistVal(col - 1, yi - 2) + MALUS_1;
-               if (board.pinAllowed(col - 1, yi - 2, Board.YPLAYER)
-                     && board.bridgeAllowed(col, yi, 1) && zval < pval)
+               zval = computeDistanceToNextPin(ownPinX - 1, y - 2) + MALUS_1;
+               if (board.pinAllowed(ownPinX - 1, y - 2, Board.YPLAYER)
+                     && board.bridgeAllowed(ownPinX, y, 1) && zval < pval)
                {
                   pval = zval;
-                  relevantXpos = data[col - 1][yi - 2].getFatherX();
-                  relevantYpos = data[col - 1][yi - 2].getFatherY();
+                  relevantXpos = data[ownPinX - 1][y - 2].getFatherX();
+                  relevantYpos = data[ownPinX - 1][y - 2].getFatherY();
                   // System.out.print("(l)");
                }
                // look to the right
-               zval = getDistVal(col + 1, yi - 2) + MALUS_1;
+               zval = computeDistanceToNextPin(ownPinX + 1, y - 2) + MALUS_1;
                if (zval < pval
-                     && board.pinAllowed(col + 1, yi - 2, Board.YPLAYER)
-                     && board.bridgeAllowed(col, yi, 2))
+                     && board.pinAllowed(ownPinX + 1, y - 2, Board.YPLAYER)
+                     && board.bridgeAllowed(ownPinX, y, 2))
                {
                   pval = zval;
-                  relevantXpos = data[col + 1][yi - 2].getFatherX();
-                  relevantYpos = data[col + 1][yi - 2].getFatherY();
+                  relevantXpos = data[ownPinX + 1][y - 2].getFatherX();
+                  relevantYpos = data[ownPinX + 1][y - 2].getFatherY();
                   // System.out.print("(r)");
                }
                
                // look to the far left
-               zval = getDistVal(col - 2, yi - 1) + MALUS_2;
+               zval = computeDistanceToNextPin(ownPinX - 2, y - 1) + MALUS_2;
                if (zval < pval
-                     && board.pinAllowed(col - 2, yi - 1, Board.YPLAYER)
-                     && board.bridgeAllowed(col, yi, 0))
+                     && board.pinAllowed(ownPinX - 2, y - 1, Board.YPLAYER)
+                     && board.bridgeAllowed(ownPinX, y, 0))
                {
                   pval = zval;
-                  relevantXpos = data[col - 2][yi - 1].getFatherX();
-                  relevantYpos = data[col - 2][yi - 1].getFatherY();
+                  relevantXpos = data[ownPinX - 2][y - 1].getFatherX();
+                  relevantYpos = data[ownPinX - 2][y - 1].getFatherY();
                   // System.out.print("(ll)");
                }
                else
                {
                   // look to the far right
-                  zval = getDistVal(col + 2, yi - 1) + MALUS_2;
+                  zval = computeDistanceToNextPin(ownPinX + 2, y - 1) + MALUS_2;
                   if (zval < pval
-                        && board.pinAllowed(col + 2, yi - 1, Board.YPLAYER)
-                        && board.bridgeAllowed(col, yi, 3))
+                        && board.pinAllowed(ownPinX + 2, y - 1, Board.YPLAYER)
+                        && board.bridgeAllowed(ownPinX, y, 3))
                   {
                      pval = zval;
-                     relevantXpos = data[col + 2][yi - 1].getFatherX();
-                     relevantYpos = data[col + 2][yi - 1].getFatherY();
+                     relevantXpos = data[ownPinX + 2][y - 1].getFatherX();
+                     relevantYpos = data[ownPinX + 2][y - 1].getFatherY();
                      // System.out.print("(rr)");
                   }
                }
@@ -871,18 +878,18 @@ public final class Evaluation implements Board.BoardListener
             //   and not blocked by races
             // ('relevantYpos != 0' means: tests only on baseline)
             boolean acceptFather = relevantYpos != 0 ||
-                  (checkPlausiTop(col, relevantXpos, relevantYpos, nextPlayer))
-                        && races.checkTop(col, yi, board, nextPlayer);
+                  (checkPlausiTop(ownPinX, relevantXpos, relevantYpos, nextPlayer))
+                        && races.checkTop(ownPinX, y, board, nextPlayer);
 
             //System.out.println("pval: " + pval + " - " + data[col][yi].getValue() + ":" + acceptFather);
 
             // take new value only if smaller than current value
-            if (acceptFather && (pval < data[col][yi].getValue() || yi == 0))
+            if (acceptFather && (pval < data[ownPinX][y].getValue() || y == 0))
             {
-               data[col][yi].setRel(relevantXpos, relevantYpos);
+               data[ownPinX][y].setRel(relevantXpos, relevantYpos);
                // start recursive analysis
-               graphstX[0] = col;
-               graphstY[0] = yi;
+               graphstX[0] = ownPinX;
+               graphstY[0] = y;
                stackcnt = 1;
                evalStructure(pval);
             }
@@ -890,13 +897,28 @@ public final class Evaluation implements Board.BoardListener
       } // for y
    } // evaluateY
 
+   private void resetPinValues()
+   {
+      final int ymax = board.getYsize();
+      for (int y = 1; y < ymax; y++) // each row
+      {
+         for (int ix = 0, n = numberOfPinsInRow[y]; ix < n; ix++)
+         {
+            final int ownPinX = positionsOfOwnPinsInRow[y][ix];
+            data[ownPinX][y].setValue(BLOCKED_FIELD_VAL_MULT);
+            data[ownPinX][y].setRel(NO_FATHER, NO_FATHER);
+            // fatherX[ownPin[yi][i]][yi] = NO_FATHER;
+         }
+      }
+   }
+
    /**
     * Compute value of situation. EvaluateY has to be called before.
     * @param computeCritical Compute critical pin as well?
     * @param nextPlayer Who's turn is next?
     * @return value of situation. The smaller the better. '0' for game-over.
     */
-   private int valueOfY(final boolean computeCritical, final int nextPlayer)
+   private int computeScore(final boolean computeCritical, final int nextPlayer)
    {
       int bestVal = BLOCKED_FIELD_VAL * MULT, checkX, checkY;
       int bestValTenth = bestVal / 10;
@@ -929,7 +951,7 @@ public final class Evaluation implements Board.BoardListener
          }
          else
          {
-            int dist = getDistVal(xi, ySz);
+            int dist = computeDistanceToNextPin(xi, ySz);
             distTenth = dist / 10;
             if (data[xi][ySz].getFatherY() > 0 && distTenth <= bestValTenth)
             {
@@ -965,7 +987,7 @@ public final class Evaluation implements Board.BoardListener
       // The critical pins can be found if needed
       if (computeCritical)
       {
-         critPoss.clear();
+         criticalPositions.clear();
          for (Iterator<Move> iterator = startingPoints.iterator(); iterator.hasNext();)
          {
             Move move = iterator.next();
@@ -997,7 +1019,7 @@ public final class Evaluation implements Board.BoardListener
       {  // if not in the last row and not empty in the first
          if (yc < board.getYsize() - 1 && board.getPin(xc, yc) == Board.YPLAYER)
          {
-            critPoss.add(new CritPos(xc, yc, CritPos.DOWN));
+            criticalPositions.add(new CritPos(xc, yc, CritPos.DOWN));
          }
 
          //start recursive procedure to find northpole
@@ -1015,7 +1037,7 @@ public final class Evaluation implements Board.BoardListener
                   finish = true;
                } else {
                   seen.add(cp);
-                  critPoss.add(cp);
+                  criticalPositions.add(cp);
                }
             }
             thisData = data[fp.getX()][fp.getY()];
@@ -1031,15 +1053,6 @@ public final class Evaluation implements Board.BoardListener
       } while (!finish);
 
    } //computeCritical
-
-   /**
-    * Get all critical Positions.
-    * @return Set of critical pins
-    */
-   public Set<CritPos> getCritical()
-   {
-      return critPoss;
-   }
 
    /**
     * Check if a pin near the border could be successful.

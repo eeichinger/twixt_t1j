@@ -11,6 +11,7 @@ package net.schwagereit.t1j;
 import java.util.*;
 
 import lombok.NonNull;
+import net.schwagereit.t1j.Evaluation.CritPos;
 
 
 /**
@@ -70,35 +71,31 @@ final class MoveGenerator
       Board oppBoard = match.getBoard(-player);
       Evaluation oppEval = match.getEval(-player);
 
-      // eval for opponent
-      int oppVal = oppEval.evaluateY(true, Board.YPLAYER);
+      final Set<CritPos> critPosOpp = oppEval.computeCriticalY();
+      final Set<CritPos> critPosOwn = ownEval.computeCriticalY();
 
       // gameover?
-      if (oppVal == 0)
+      if (critPosOpp == null || critPosOwn == null)
       {
          return moves;
       }
 
-      // own eval
-      ownEval.evaluateY(true, Board.YPLAYER);
-
       // check own critical points
-      Set<Evaluation.CritPos> s = ownEval.getCritical();
-      if (s.isEmpty())
+      if (critPosOwn.isEmpty())
       {
          //there are some situations where the last pin set has to be
          //   taken as last hope to find a good move
          Move lastMove = match.getLastMove();
          int xc = lastMove.getX();
          int yc = lastMove.getY();
-         s.add(new Evaluation.CritPos(xc, yc, Evaluation.CritPos.DOWN));
-         s.add(new Evaluation.CritPos(xc, yc, Evaluation.CritPos.UP));
+         critPosOwn.add(new CritPos(xc, yc, CritPos.DOWN));
+         critPosOwn.add(new CritPos(xc, yc, CritPos.UP));
       }
 
       // iterate over all own critical points
-      for (Iterator<Evaluation.CritPos> iter = s.iterator(); iter.hasNext();)
+      for (Iterator<CritPos> it = critPosOwn.iterator(); it.hasNext();)
       {
-         Evaluation.CritPos element = iter.next();
+         CritPos element = it.next();
 
          int xe = element.getX();
          int ye = element.getY();
@@ -159,12 +156,10 @@ final class MoveGenerator
       }
 
       // moves against opponent
-      s = oppEval.getCritical();
-
       //iterate over all critical point of opponent
-      for (Iterator iter = s.iterator(); iter.hasNext();)
+      for (Iterator<CritPos> it = critPosOpp.iterator(); it.hasNext();)
       {
-         Evaluation.CritPos element = (Evaluation.CritPos) iter.next();
+         CritPos element = it.next();
 
          int ye = element.getX(); // CAUTION: swapped
          int xe = element.getY();

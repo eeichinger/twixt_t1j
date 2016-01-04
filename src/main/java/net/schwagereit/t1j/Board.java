@@ -52,7 +52,8 @@ public final class Board
 
    public interface BoardListener
    {
-      void addForY(int x, int y);
+      void reset();
+      void addForY(int x, int y, int player);
       void removeForY(int x, int y, int player);
    }
 
@@ -72,7 +73,7 @@ public final class Board
       /**
        * Initialize a node.
        */
-      void clear()
+      void reset()
       {
          player = 0;
          bridge[0] = 0;
@@ -265,15 +266,19 @@ public final class Board
    /**
     * Clear the board between two games.
     */
-   public void clearBoard()
+   public void reset()
    {
       int i, j;
       for (i = 0; i < MAXBOARDSIZE; i++)
          for (j = 0; j < MAXBOARDSIZE; j++)
          {
-            field[i][j].clear();
+            field[i][j].reset();
          }
       zobristValue = 0;
+
+      if (boardListener != null) {
+         boardListener.reset();
+      }
    }
 
    /**
@@ -485,7 +490,7 @@ public final class Board
       }
 
       if (boardListener != null) {
-         boardListener.addForY(xin, yin);
+         boardListener.addForY(xin, yin, player);
       }
       return true; //set was okay
    }

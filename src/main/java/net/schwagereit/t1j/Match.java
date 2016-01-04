@@ -113,8 +113,8 @@ public final class Match extends Observable implements Runnable
    {
       this.matchData = md;
       nextPlayer = matchData.mdYstarts ? Board.YPLAYER : Board.XPLAYER;
-      boardY.clearBoard();
-      boardX.clearBoard();
+      boardY.reset();
+      boardX.reset();
       moves.clear();
       moveNr = 0;
       highestMoveNr = 0;
@@ -123,10 +123,7 @@ public final class Match extends Observable implements Runnable
       setGuiBlocked(false);
 
       boardY.setSize(matchData.mdXsize, matchData.mdYsize);
-      evalY.setupForY();
-
       boardX.setSize(matchData.mdYsize, matchData.mdXsize);
-      evalX.setupForY();
 
       resetMoveList();
 
@@ -417,12 +414,12 @@ public final class Match extends Observable implements Runnable
    {
       // check for finished match
       String matchOverMessage = "";
-      if ((evalY.evaluateY(false, Board.XPLAYER) == 0))
+      if ((evalY.evaluateY(Board.XPLAYER) == 0))
       {
          matchOverMessage = matchData.mdPlayerY + " "
          + Messages.getString("Match.topDown");
       }
-      else if ((evalX.evaluateY(false, Board.XPLAYER) == 0))
+      else if ((evalX.evaluateY(Board.XPLAYER) == 0))
       {
          matchOverMessage = matchData.mdPlayerX + " "
          + Messages.getString("Match.leftRight");

@@ -168,8 +168,8 @@ public final class FindMove
       int positionValY, positionValX;
 
       // evaluate
-      positionValY = match.getEvalY().evaluateY(false, player);
-      positionValX = match.getEvalX().evaluateY(false, -player);
+      positionValY = match.getEvalY().evaluateY(player);
+      positionValX = match.getEvalX().evaluateY(-player);
 
 
       // at the first move only defensive moves are good
