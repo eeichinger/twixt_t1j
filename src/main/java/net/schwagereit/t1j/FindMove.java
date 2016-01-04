@@ -360,7 +360,8 @@ public final class FindMove
       if (cacheAccessCount % 10000 == 0) {
          System.out.println(String.format("analysed positions cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
       }
-      final Integer cacheKey = match.getBoardY().getZobristValue();
+      final Board boardY = match.getBoardY();
+      Integer cacheKey = boardY.getZobristValue();
       Integer cachedScore = evaluatedBoardPositionCache.get(cacheKey);
       if (cachedScore != null)
       {
@@ -372,7 +373,7 @@ public final class FindMove
       evaluatedBoardPositionCache.put(cacheKey, calculatedScore);
 
       if (cachedScore != null && cachedScore != calculatedScore) {
-         // will throw - means cacheKey needs rework
+         // TODO: figure out why re-evaluating the board sometimes results in different scores?!?
          System.err.println("cached/calculated score differ for same board position!");
 //         throw new IllegalStateException("cached/calculated score differ for same board position!");
       }
