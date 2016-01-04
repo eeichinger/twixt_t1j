@@ -20,8 +20,6 @@ import lombok.NonNull;
  */
 public final class Evaluation implements Board.BoardListener
 {
-
-
    /**
     * A critPos is a pin which is critical for evaluation of board.
     */
@@ -232,9 +230,6 @@ public final class Evaluation implements Board.BoardListener
       }
    }
 
-   /** Array of internal data for evaluation. */
-   final FieldData[][] data = new FieldData[Board.MAXDIM][Board.MAXDIM]; // 36
-
    /** handling the internal stack. */
    private static final int GRAPH_SZ = 200;
 
@@ -243,6 +238,11 @@ public final class Evaluation implements Board.BoardListener
    private final int[] graphstY = new int[GRAPH_SZ];
 
    private int stackcnt;
+
+   private final Races races = new Races();
+
+   /** Array of internal data for evaluation. */
+   private final FieldData[][] data = new FieldData[Board.MAXDIM][Board.MAXDIM]; // 36
 
    @NonNull
    private final Board board;
@@ -872,7 +872,7 @@ public final class Evaluation implements Board.BoardListener
             // ('relevantYpos != 0' means: tests only on baseline)
             boolean acceptFather = relevantYpos != 0 ||
                   (checkPlausiTop(col, relevantXpos, relevantYpos, nextPlayer))
-                        && Races.getRaces().checkTop(col, yi, board, nextPlayer);
+                        && races.checkTop(col, yi, board, nextPlayer);
 
             //System.out.println("pval: " + pval + " - " + data[col][yi].getValue() + ":" + acceptFather);
 
@@ -903,7 +903,7 @@ public final class Evaluation implements Board.BoardListener
       int distTenth;
       int ySz = board.getYsize() - 1;
 
-      Set<Move> startingPoints = new HashSet<Move>();
+      Set<Move> startingPoints = new HashSet<>();
 
       for (int xi = 1; xi < board.getXsize() - 1; xi++) // each field of last row
       {
@@ -939,7 +939,7 @@ public final class Evaluation implements Board.BoardListener
                //never accept pin which are too far to the side if
                //   next pin is set by opponent
                if (checkPlausiBottom(xi, checkX, checkY, nextPlayer)
-                     && Races.getRaces().checkBottom(checkX, checkY, board, nextPlayer))
+                     && races.checkBottom(checkX, checkY, board, nextPlayer))
                {
                   if (computeCritical)
                   {
