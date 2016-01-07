@@ -583,36 +583,31 @@ public final class Evaluation implements Board.BoardListener
       int xi, yi;
 
       // setup first row
-      numberOfPinsInRow[0] = 0;
-      for (xi = 0; xi < xmax; xi++)
-      {
-         calculateDistForY(xi, 0);
-         if (board.getPin(xi, 0) == Board.YPLAYER)
-         {
-            // TODO: what's ownPin[0][noPins[0]] supposed to mean?
-            positionsOfOwnPinsInRow[0][numberOfPinsInRow[0]] = xi;
-            numberOfPinsInRow[0]++;
-         }
-      }
+      refreshPinsInRow(xmax, 0, true);
 
       for (yi = 1; yi < ymax; yi++)
       {
-         numberOfPinsInRow[yi] = 0;
-         for (xi = 0; xi < xmax; xi++)
+         refreshPinsInRow(xmax, yi, true);
+      }
+   }
+
+   private void refreshPinsInRow(int xmax, int yi, boolean calcDist)
+   {
+      int xi;
+      numberOfPinsInRow[yi] = 0;
+      for (xi = 0; xi < xmax; xi++)
+      {
+         if (calcDist) calculateDistForY(xi, yi);
+         // addElement own pin to list of own pins
+         if (board.getPin(xi, yi) == Board.YPLAYER)
          {
-            calculateDistForY(xi, yi);
-            // addElement own pin to list of own pins
-            if (board.getPin(xi, yi) == Board.YPLAYER)
-            {
-               positionsOfOwnPinsInRow[yi][numberOfPinsInRow[yi]] = xi;
-               numberOfPinsInRow[yi]++;
-            }
+            positionsOfOwnPinsInRow[yi][numberOfPinsInRow[yi]] = xi;
+            numberOfPinsInRow[yi]++;
          }
       }
    }
 
-   
-   
+
    /**
     * Update rows below.
     * @param xin x Position of new or removed pin
@@ -735,7 +730,8 @@ public final class Evaluation implements Board.BoardListener
       // remove own pin from list of own pins
       if (player == Board.YPLAYER)
       {
-         numberOfPinsInRow[y]--;
+         refreshPinsInRow(board.getXsize(), y, false);
+//         numberOfPinsInRow[y]--;
       }
 
    } // removeForY
@@ -785,6 +781,7 @@ public final class Evaluation implements Board.BoardListener
     * @return score of position. The smaller the better. '0' for game-over.
     */
    public int evaluateY(int nextPlayer) {
+//      reset();
       recomputePinValues(nextPlayer);
       final int score = computeScore(false, nextPlayer);
       return score;

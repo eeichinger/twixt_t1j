@@ -16,40 +16,6 @@ package net.schwagereit.t1j;
  */
 public final class Board
 {
-   public static class BoardState {
-      private final Node[][] field = new Node[MAXBOARDSIZE][MAXBOARDSIZE];
-
-      public BoardState(Board board) {
-         // TODO: do we really need to copy the "max" board size or is xsize/ysize enough
-         for (int i = 0; i < MAXBOARDSIZE; i++)
-         {
-            for (int j = 0; j < MAXBOARDSIZE; j++)
-            {
-               this.field[i][j] = new Node(board.field[i][j]);
-            }
-         }
-      }
-
-      public boolean equals(BoardState other)
-      {
-         for (int i = 0; i < MAXBOARDSIZE; i++)
-         {
-            for (int j = 0; j < MAXBOARDSIZE; j++)
-            {
-               if (!this.field[i][j].equals(other.field[i][j])) {
-                  return false;
-               }
-            }
-         }
-         return true;
-      }
-   }
-
-   public BoardState captureState()
-   {
-      return new BoardState(this);
-   }
-
    public interface BoardListener
    {
       void reset();
@@ -83,11 +49,18 @@ public final class Board
       }
 
       public int hashCode() {
-         throw new UnsupportedOperationException("node is not meant to be used as a key");
+         return 23*player + 29*bridge[0] + 31*bridge[1]  + 37*bridge[2] + 71*bridge[3];
       }
 
       public boolean equals(Object o) {
-         throw new UnsupportedOperationException("should never get here");
+         if (!(o instanceof Node)) return false;
+         Node other = (Node) o;
+         return player==other.player
+            && bridge[0]==other.bridge[0]
+            && bridge[1]==other.bridge[1]
+            && bridge[2]==other.bridge[2]
+            && bridge[3]==other.bridge[3]
+            ;
       }
 
       /**
@@ -179,7 +152,7 @@ public final class Board
 
 
    /** Value of board for zobrist-hashing. */
-   private int zobristValue;
+   private long zobristValue;
 
    /** size of board. */
    private int xsize, ysize;
@@ -701,7 +674,7 @@ public final class Board
     * get current zobrist value.
     * @return int
     */
-   public int getZobristValue()
+   public long getZobristValue()
    {
       return zobristValue;
    }

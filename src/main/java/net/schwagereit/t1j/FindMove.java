@@ -1,19 +1,20 @@
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
+ * *
+ * This program is free software; you can redistribute it and/or modify  *
+ * it under the terms of the GNU General Public License as published by  *
+ * the Free Software Foundation; either version 2 of the License, or     *
+ * (at your option) any later version.                                   *
+ * *
  ***************************************************************************/
 package net.schwagereit.t1j;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-
 import lombok.NonNull;
 import lombok.Value;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -38,9 +39,12 @@ public final class FindMove
    private int currentPlayer;
 
    // replace with specialized int2int map: http://java-performance.info/implementing-world-fastest-java-int-to-int-hash-map/
-   private final Map<Integer,Integer> evaluatedBoardPositionCache = new HashMap<>(INITIAL_CAPACITY);
+   private final Map<Long, Integer> evaluatedBoardPositionCache = new HashMap<>(INITIAL_CAPACITY);
    private int cacheAccessCount = 0;
    private int cacheHitCount = 0;
+   private int cacheMismatchCount = 0;
+   private int cacheKeyCollisionCount = 0;
+   private int scoreEvaluationErrorCount = 0;
 
    private Stopwatch clock;
    /** use alphabeta for highest ply. */
@@ -69,7 +73,8 @@ public final class FindMove
    }
 
    @Value
-   public static class ComputeMoveResult {
+   public static class ComputeMoveResult
+   {
       Move move;
       int analysedPositions;
    }
@@ -101,12 +106,12 @@ public final class FindMove
       return bestMove;
    }
 
-   private void releaseThreadTimeSlice() {
+   private void releaseThreadTimeSlice()
+   {
       try
       {
          Thread.sleep(WAIT_MILLIS);
-      }
-      catch (InterruptedException e)
+      } catch (InterruptedException e)
       {
          System.out.println("Sleep Interrupted");
       }
@@ -124,8 +129,7 @@ public final class FindMove
       {
          maxPly = generalSettings.mdPly;
          maxTime = -1;
-      }
-      else
+      } else
       {
          //move moves with time-limit
          maxPly = Integer.MAX_VALUE; // will never be reached
@@ -171,15 +175,13 @@ public final class FindMove
       positionValY = match.getEvalY().evaluateY(player);
       positionValX = match.getEvalX().evaluateY(-player);
 
-
       // at the first move only defensive moves are good
       if (match.getMoveNr() < 8)
       {
          if (currentPlayer == Board.YPLAYER)
          {
             positionValY = 0;
-         }
-         else
+         } else
          {
             positionValX = 0;
          }
@@ -251,20 +253,20 @@ public final class FindMove
       // minimizing node
       {
          return evaluatePromisingMovesX(computeMoveContext, Board.XPLAYER, maxPly, ply, alpha, beta, promisingMoves);
-      }
-      else
+      } else
       //maximizing node
       {
          return evaluatePromisingMovesY(computeMoveContext, Board.YPLAYER, maxPly, ply, alpha, beta, promisingMoves);
       }
    }
 
-   private int evaluatePromisingMovesY(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluatePromisingMovesY(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves)
+   {
       int val;
-      for(Move move:orderedMoves)
+      for (Move move : orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
+         val = alphaBeta(computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
          // zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
          if (ply == maxPly)
          {
@@ -289,8 +291,7 @@ public final class FindMove
                {
                   alpha = val;
                }
-            }
-            else
+            } else
             {
                alpha = val;
                computeMoveContext.addKiller(move, player);
@@ -307,12 +308,13 @@ public final class FindMove
       return alpha;
    }
 
-   private int evaluatePromisingMovesX(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves) {
+   private int evaluatePromisingMovesX(ComputeMoveContext computeMoveContext, int player, int maxPly, int ply, int alpha, int beta, List<Move> orderedMoves)
+   {
       int val;
-      for(Move move:orderedMoves)
+      for (Move move : orderedMoves)
       {
          makeMove(move, player);
-         val = alphaBeta (computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
+         val = alphaBeta(computeMoveContext, -player, maxPly, ply - 1, alpha, beta);
          //zobristMap.put(new Integer(match.getBoardY().getZobristValue()), new Integer(val));
 
          if (ply == maxPly)
@@ -342,8 +344,7 @@ public final class FindMove
                {
                   beta = val;
                }
-            }
-            else
+            } else
             {
                beta = val;
                computeMoveContext.addKiller(move, player);
@@ -359,50 +360,61 @@ public final class FindMove
       return beta;
    }
 
-   private boolean isThinkingTimeExceeded() {
+   private boolean isThinkingTimeExceeded()
+   {
       return maxTime > 0 && maxTime * MILLI_PER_SEC <= clock.getElapsedMillis();
    }
 
-   private int positionValue(int player) {
+   private int positionValue(int player)
+   {
       // TODO: sadly despite a 70% cache hit ratio, we only get a performance improvement of ~10%
       cacheAccessCount++;
-      if (cacheAccessCount % 10000 == 0) {
-         System.out.println(String.format("analysed distinct positions, cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount*100/cacheAccessCount)));
+      if (cacheAccessCount % 10000 == 0)
+      {
+         System.out.println(String.format("analysed distinct positions, cache hit ratio: %s/%s ~ %s%%", cacheHitCount, cacheAccessCount, (cacheHitCount * 100 / cacheAccessCount)));
+         System.out.println(String.format("cached/calculated score mismatch rate (%s/%s) ~ %s%%", cacheMismatchCount, cacheAccessCount, (cacheMismatchCount * 100 / cacheAccessCount)));
+         System.out.println(String.format("score evaluation errors %s", scoreEvaluationErrorCount));
+         System.out.println(String.format("cache key collisions %s", cacheKeyCollisionCount));
+         System.out.println(String.format("distinct scores %s", scores.size()));
       }
 
       final Board boardY = match.getBoardY();
-      Integer cacheKey = boardY.getZobristValue();
+      Long cacheKey = boardY.getZobristValue();
 
-/*
-      Board.BoardState boardState = null;
-      if (cacheKey == <offending cache key reported by System.err below>) {
-         boardState = boardY.captureState();
-      }
-*/
       Integer cachedScore = evaluatedBoardPositionCache.get(cacheKey);
       if (cachedScore != null)
       {
          cacheHitCount++;
-         //System.out.println("Treffer bei ply = " + ply + " Hashsize:" + zobristMap.size());
          if (!DEBUG) return cachedScore;
       }
+
       int calculatedScore = evaluatePosition(player);
+      scores.add(calculatedScore);
       evaluatedBoardPositionCache.put(cacheKey, calculatedScore);
+      if (DEBUG)
+      {
+         if (cachedScore != null && calculatedScore != cachedScore)
+         {
+            // record hash collision
+            cacheMismatchCount++;
+            System.err.println(String.format("cached/calculated score indicate either cache key collision or bug in eval function %s", cacheKey));
 
-      if (DEBUG && cachedScore != null && cachedScore != calculatedScore) {
-         // TODO: -> sad truth is, our zobrist keys are not unique - needs rework
-         System.err.println("cached/calculated score indicate cache key collision " + cacheKey);
-/*
-         Board.BoardState currentBoardState = boardY.captureState();
+            // reset and re-evaluate
+//            match.getEvalY().reset();
+//            match.getEvalX().reset();
+            int recalcScore = evaluatePosition(player);
 
-         if (!currentBoardState.equals(cachedBoardState)) {
-            throw new IllegalStateException("key conflict " + cacheKey);
-         };
-
-         throw new IllegalStateException("cached/calculated score differ for same board position " + cacheKey);
-*/
+            if (calculatedScore == recalcScore) {
+               System.err.println(String.format("cached/calculated scores differ - cacheKey collision?: %s - %s, %s, %s", cacheKey, cachedScore, calculatedScore, recalcScore));
+               cacheKeyCollisionCount++;
+            } else {
+               System.err.println(String.format("cached/calculated scores differ - eval bug?: %s - %s, %s, %s", cacheKey, cachedScore, calculatedScore, recalcScore));
+               scoreEvaluationErrorCount++;
+            }
+         }
       }
       return calculatedScore;
    }
 
+   HashSet<Integer> scores = new HashSet<>();
 }
